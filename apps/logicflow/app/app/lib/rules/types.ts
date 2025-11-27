@@ -52,20 +52,34 @@ export type ActionResponse = ActionSuccessResponse | ActionErrorResponse;
 // Form State Types
 // ============================================================================
 
-export interface RuleFormState {
-  name: string;
+export interface ConditionFormData {
+  id: string;
   field: string;
   operator: string;
   value: string;
+}
+
+export interface RuleFormState {
+  name: string;
+  conditions: ConditionFormData[];
+  logicalOperator: "AND" | "OR";
   errorMessage: string;
   enabled: boolean;
 }
 
+export function createDefaultCondition(): ConditionFormData {
+  return {
+    id: `cond_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    field: "cart.total",
+    operator: "GREATER_THAN",
+    value: "100",
+  };
+}
+
 export const DEFAULT_FORM_STATE: RuleFormState = {
   name: "",
-  field: "cart.total",
-  operator: "GREATER_THAN",
-  value: "100",
+  conditions: [createDefaultCondition()],
+  logicalOperator: "AND",
   errorMessage: "Your cart total exceeds our limit.",
   enabled: true,
 };

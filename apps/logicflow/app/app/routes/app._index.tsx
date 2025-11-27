@@ -12,6 +12,7 @@ import type {
   RulesConfig,
   ConditionGroup,
   ActionResponse,
+  ConditionFormData,
 } from "~/lib/rules/types";
 import { useRuleForm, useDeleteConfirmation } from "~/lib/rules/hooks";
 import {
@@ -68,22 +69,31 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (actionType === "create" || actionType === "update") {
     const ruleId = formData.get("ruleId") as string;
     const name = formData.get("name") as string;
-    const field = formData.get("field") as string;
-    const operator = formData.get("operator") as string;
-    const value = formData.get("value") as string;
+    const conditionsJson = formData.get("conditions") as string;
+    const logicalOperator = formData.get("logicalOperator") as "AND" | "OR";
     const errorMessage = formData.get("errorMessage") as string;
     const enabled = formData.get("enabled") === "true";
 
+    // Parse conditions from JSON
+    let formConditions: ConditionFormData[] = [];
+    try {
+      formConditions = JSON.parse(conditionsJson);
+    } catch (e) {
+      return json<ActionResponse>({
+        success: false,
+        error: "Invalid conditions format",
+      });
+    }
+
+    // Build condition group from form data
     const conditions: ConditionGroup = {
-      operator: "AND",
-      criteria: [
-        {
-          field,
-          operator,
-          value: parseValue(value, operator),
-          is_preset: false,
-        },
-      ],
+      operator: logicalOperator || "AND",
+      criteria: formConditions.map((c) => ({
+        field: c.field,
+        operator: c.operator,
+        value: parseValue(c.value, c.operator),
+        is_preset: false,
+      })),
     };
 
     const newRule: Rule = {
@@ -202,9 +212,8 @@ export default function RulesPage() {
   const {
     formState,
     setName,
-    setField,
-    setOperator,
-    setValue,
+    setConditions,
+    setLogicalOperator,
     setErrorMessage,
     setEnabled,
     isModalOpen,
@@ -226,9 +235,8 @@ export default function RulesPage() {
       data.append("ruleId", editingRule.id);
     }
     data.append("name", formState.name);
-    data.append("field", formState.field);
-    data.append("operator", formState.operator);
-    data.append("value", formState.value);
+    data.append("conditions", JSON.stringify(formState.conditions));
+    data.append("logicalOperator", formState.logicalOperator);
     data.append("errorMessage", formState.errorMessage);
     data.append("enabled", String(formState.enabled));
     submit(data, { method: "post" });
@@ -316,9 +324,8 @@ export default function RulesPage() {
           editingRule={editingRule}
           formState={formState}
           onNameChange={setName}
-          onFieldChange={setField}
-          onOperatorChange={setOperator}
-          onValueChange={setValue}
+          onConditionsChange={setConditions}
+          onLogicalOperatorChange={setLogicalOperator}
           onErrorMessageChange={setErrorMessage}
           onEnabledChange={setEnabled}
           onSave={handleSaveRule}

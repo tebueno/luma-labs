@@ -1,15 +1,14 @@
-import { Modal, BlockStack, TextField, Select, Checkbox } from "@shopify/polaris";
-import { FIELD_OPTIONS, OPERATOR_OPTIONS } from "../constants";
-import type { Rule, RuleFormState } from "../types";
+import { Modal, BlockStack, TextField, Checkbox } from "@shopify/polaris";
+import type { Rule, RuleFormState, ConditionFormData } from "../types";
+import { ConditionBuilder } from "./ConditionBuilder";
 
 interface RuleModalProps {
   open: boolean;
   editingRule: Rule | null;
   formState: RuleFormState;
   onNameChange: (value: string) => void;
-  onFieldChange: (value: string) => void;
-  onOperatorChange: (value: string) => void;
-  onValueChange: (value: string) => void;
+  onConditionsChange: (conditions: ConditionFormData[]) => void;
+  onLogicalOperatorChange: (operator: "AND" | "OR") => void;
   onErrorMessageChange: (value: string) => void;
   onEnabledChange: (value: boolean) => void;
   onSave: () => void;
@@ -21,19 +20,13 @@ export function RuleModal({
   editingRule,
   formState,
   onNameChange,
-  onFieldChange,
-  onOperatorChange,
-  onValueChange,
+  onConditionsChange,
+  onLogicalOperatorChange,
   onErrorMessageChange,
   onEnabledChange,
   onSave,
   onClose,
 }: RuleModalProps) {
-  const isNumericField =
-    formState.field.includes("total") ||
-    formState.field.includes("quantity") ||
-    formState.field.includes("weight");
-
   return (
     <Modal
       open={open}
@@ -49,9 +42,10 @@ export function RuleModal({
           onAction: onClose,
         },
       ]}
+      size="large"
     >
       <Modal.Section>
-        <BlockStack gap="400">
+        <BlockStack gap="500">
           <TextField
             label="Rule Name"
             value={formState.name}
@@ -60,35 +54,20 @@ export function RuleModal({
             placeholder="e.g., Block high-value orders"
           />
 
-          <Select
-            label="If this field..."
-            options={[...FIELD_OPTIONS]}
-            value={formState.field}
-            onChange={onFieldChange}
-          />
-
-          <Select
-            label="...matches this condition..."
-            options={[...OPERATOR_OPTIONS]}
-            value={formState.operator}
-            onChange={onOperatorChange}
+          <ConditionBuilder
+            conditions={formState.conditions}
+            logicalOperator={formState.logicalOperator}
+            onConditionsChange={onConditionsChange}
+            onLogicalOperatorChange={onLogicalOperatorChange}
           />
 
           <TextField
-            label="...with this value"
-            value={formState.value}
-            onChange={onValueChange}
-            autoComplete="off"
-            helpText={isNumericField ? "Enter a number" : "Enter text to match"}
-          />
-
-          <TextField
-            label="Then show this error message"
+            label="Error Message"
             value={formState.errorMessage}
             onChange={onErrorMessageChange}
             autoComplete="off"
             multiline={2}
-            helpText="This message will be shown to customers at checkout"
+            helpText="This message will be shown to customers at checkout when the rule blocks their order"
           />
 
           <Checkbox
@@ -101,4 +80,3 @@ export function RuleModal({
     </Modal>
   );
 }
-

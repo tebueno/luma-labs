@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import type { Rule, RuleFormState } from "./types";
-import { DEFAULT_FORM_STATE } from "./types";
+import type { Rule, RuleFormState, ConditionFormData } from "./types";
+import { DEFAULT_FORM_STATE, createDefaultCondition } from "./types";
 
 // ============================================================================
 // useRuleForm Hook
@@ -10,9 +10,8 @@ export interface UseRuleFormReturn {
   // Form state
   formState: RuleFormState;
   setName: (value: string) => void;
-  setField: (value: string) => void;
-  setOperator: (value: string) => void;
-  setValue: (value: string) => void;
+  setConditions: (conditions: ConditionFormData[]) => void;
+  setLogicalOperator: (operator: "AND" | "OR") => void;
   setErrorMessage: (value: string) => void;
   setEnabled: (value: boolean) => void;
 
@@ -30,9 +29,12 @@ export interface UseRuleFormReturn {
 export function useRuleForm(): UseRuleFormReturn {
   // Form state
   const [name, setName] = useState(DEFAULT_FORM_STATE.name);
-  const [field, setField] = useState(DEFAULT_FORM_STATE.field);
-  const [operator, setOperator] = useState(DEFAULT_FORM_STATE.operator);
-  const [value, setValue] = useState(DEFAULT_FORM_STATE.value);
+  const [conditions, setConditions] = useState<ConditionFormData[]>(
+    DEFAULT_FORM_STATE.conditions
+  );
+  const [logicalOperator, setLogicalOperator] = useState<"AND" | "OR">(
+    DEFAULT_FORM_STATE.logicalOperator
+  );
   const [errorMessage, setErrorMessage] = useState(DEFAULT_FORM_STATE.errorMessage);
   const [enabled, setEnabled] = useState(DEFAULT_FORM_STATE.enabled);
 
@@ -43,9 +45,8 @@ export function useRuleForm(): UseRuleFormReturn {
   // Reset form to defaults
   const resetForm = useCallback(() => {
     setName(DEFAULT_FORM_STATE.name);
-    setField(DEFAULT_FORM_STATE.field);
-    setOperator(DEFAULT_FORM_STATE.operator);
-    setValue(DEFAULT_FORM_STATE.value);
+    setConditions([createDefaultCondition()]);
+    setLogicalOperator(DEFAULT_FORM_STATE.logicalOperator);
     setErrorMessage(DEFAULT_FORM_STATE.errorMessage);
     setEnabled(DEFAULT_FORM_STATE.enabled);
     setEditingRule(null);
@@ -63,15 +64,26 @@ export function useRuleForm(): UseRuleFormReturn {
     setName(rule.name);
     setEnabled(rule.enabled);
     setErrorMessage(rule.error_message);
+    setLogicalOperator(rule.conditions.operator);
 
-    // Extract first condition (simplified for MVP)
-    const firstCondition = rule.conditions.criteria[0];
-    if (firstCondition && "field" in firstCondition) {
-      setField(firstCondition.field);
-      setOperator(firstCondition.operator);
-      setValue(String(firstCondition.value));
+    // Convert conditions from rule format to form format
+    const formConditions: ConditionFormData[] = rule.conditions.criteria
+      .filter((c): c is { field: string; operator: string; value: string | number; is_preset: boolean } => 
+        "field" in c
+      )
+      .map((c, index) => ({
+        id: `cond_${Date.now()}_${index}`,
+        field: c.field,
+        operator: c.operator,
+        value: String(c.value),
+      }));
+
+    // Ensure at least one condition
+    if (formConditions.length === 0) {
+      formConditions.push(createDefaultCondition());
     }
 
+    setConditions(formConditions);
     setIsModalOpen(true);
   }, []);
 
@@ -84,16 +96,14 @@ export function useRuleForm(): UseRuleFormReturn {
   return {
     formState: {
       name,
-      field,
-      operator,
-      value,
+      conditions,
+      logicalOperator,
       errorMessage,
       enabled,
     },
     setName,
-    setField,
-    setOperator,
-    setValue,
+    setConditions,
+    setLogicalOperator,
     setErrorMessage,
     setEnabled,
     isModalOpen,
@@ -132,4 +142,3 @@ export function useDeleteConfirmation(): UseDeleteConfirmationReturn {
     closeDeleteConfirm,
   };
 }
-
