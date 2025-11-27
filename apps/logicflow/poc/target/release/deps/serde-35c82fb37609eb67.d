@@ -1,0 +1,14 @@
+/Users/tombueno/repos/luma-labs/apps/logicflow/poc/target/release/deps/serde-35c82fb37609eb67.d: /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/tombueno/repos/luma-labs/apps/logicflow/poc/target/release/build/serde-e8a85bcb2b0eae68/out/private.rs
+
+/Users/tombueno/repos/luma-labs/apps/logicflow/poc/target/release/deps/libserde-35c82fb37609eb67.rlib: /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/tombueno/repos/luma-labs/apps/logicflow/poc/target/release/build/serde-e8a85bcb2b0eae68/out/private.rs
+
+/Users/tombueno/repos/luma-labs/apps/logicflow/poc/target/release/deps/libserde-35c82fb37609eb67.rmeta: /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/tombueno/repos/luma-labs/apps/logicflow/poc/target/release/build/serde-e8a85bcb2b0eae68/out/private.rs
+
+/Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/Users/tombueno/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/Users/tombueno/repos/luma-labs/apps/logicflow/poc/target/release/build/serde-e8a85bcb2b0eae68/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/tombueno/repos/luma-labs/apps/logicflow/poc/target/release/build/serde-e8a85bcb2b0eae68/out
