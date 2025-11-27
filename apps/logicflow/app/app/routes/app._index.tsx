@@ -56,136 +56,141 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     // Get owner ID for metafield operations
     const ownerId = await getAppInstallationId(admin);
-  if (!ownerId) {
-    return json<ActionResponse>({
-      success: false,
-      error: "Could not get app installation ID",
-    });
-  }
-
-  // Get existing config
-  const existingConfig = await getExistingConfig(admin);
-
-  // Handle create/update
-  if (actionType === "create" || actionType === "update") {
-    const ruleId = formData.get("ruleId") as string;
-    const name = formData.get("name") as string;
-    const conditionsJson = formData.get("conditions") as string;
-    const logicalOperator = formData.get("logicalOperator") as "AND" | "OR";
-    const errorMessage = formData.get("errorMessage") as string;
-    const enabled = formData.get("enabled") === "true";
-
-    // Parse conditions from JSON
-    let formConditions: ConditionFormData[] = [];
-    try {
-      formConditions = JSON.parse(conditionsJson);
-    } catch (e) {
+    if (!ownerId) {
       return json<ActionResponse>({
         success: false,
-        error: "Invalid conditions format",
+        error: "Could not get app installation ID",
       });
     }
 
-    // Build condition group from form data
-    const conditions: ConditionGroup = {
-      operator: logicalOperator || "AND",
-      criteria: formConditions.map((c) => ({
-        field: c.field,
-        operator: c.operator,
-        value: parseValue(c.value, c.operator),
-        is_preset: false,
-      })),
-    };
+    // Get existing config
+    const existingConfig = await getExistingConfig(admin);
 
-    const newRule: Rule = {
-      id: actionType === "create" ? generateRuleId() : ruleId,
-      name: name || "Untitled Rule",
-      complexity: calculateComplexity(conditions),
-      enabled,
-      error_message: errorMessage || "Checkout blocked by LogicFlow",
-      conditions,
-    };
+    // Handle create/update
+    if (actionType === "create" || actionType === "update") {
+      const ruleId = formData.get("ruleId") as string;
+      const name = formData.get("name") as string;
+      const conditionsJson = formData.get("conditions") as string;
+      const logicalOperator = formData.get("logicalOperator") as "AND" | "OR";
+      const errorMessage = formData.get("errorMessage") as string;
+      const enabled = formData.get("enabled") === "true";
 
-    const updatedRules =
-      actionType === "create"
-        ? [...existingConfig.rules, newRule]
-        : existingConfig.rules.map((rule) =>
-            rule.id === ruleId ? newRule : rule
-          );
+      // Parse conditions from JSON
+      let formConditions: ConditionFormData[] = [];
+      try {
+        formConditions = JSON.parse(conditionsJson);
+      } catch (e) {
+        return json<ActionResponse>({
+          success: false,
+          error: "Invalid conditions format",
+        });
+      }
 
-    const config: RulesConfig = {
-      version: "1.0",
-      total_complexity: calculateTotalComplexity(updatedRules),
-      rules: updatedRules,
-    };
+      // Build condition group from form data
+      const conditions: ConditionGroup = {
+        operator: logicalOperator || "AND",
+        criteria: formConditions.map((c) => ({
+          field: c.field,
+          operator: c.operator,
+          value: parseValue(c.value, c.operator),
+          is_preset: false,
+        })),
+      };
 
-    const result = await saveRulesConfig(admin, ownerId, config);
-    if (!result.success) {
-      return json<ActionResponse>({ success: false, error: result.error! });
+      const newRule: Rule = {
+        id: actionType === "create" ? generateRuleId() : ruleId,
+        name: name || "Untitled Rule",
+        complexity: calculateComplexity(conditions),
+        enabled,
+        error_message: errorMessage || "Checkout blocked by LogicFlow",
+        conditions,
+      };
+
+      const updatedRules =
+        actionType === "create"
+          ? [...existingConfig.rules, newRule]
+          : existingConfig.rules.map((rule) =>
+              rule.id === ruleId ? newRule : rule
+            );
+
+      const config: RulesConfig = {
+        version: "1.0",
+        total_complexity: calculateTotalComplexity(updatedRules),
+        rules: updatedRules,
+      };
+
+      const result = await saveRulesConfig(admin, ownerId, config);
+      if (!result.success) {
+        return json<ActionResponse>({ success: false, error: result.error! });
+      }
+
+      return json<ActionResponse>({
+        success: true,
+        action: actionType,
+        config,
+      });
     }
 
-    return json<ActionResponse>({ success: true, action: actionType, config });
-  }
+    // Handle delete
+    if (actionType === "delete") {
+      const ruleId = formData.get("ruleId") as string;
+      const updatedRules = existingConfig.rules.filter(
+        (rule) => rule.id !== ruleId
+      );
 
-  // Handle delete
-  if (actionType === "delete") {
-    const ruleId = formData.get("ruleId") as string;
-    const updatedRules = existingConfig.rules.filter(
-      (rule) => rule.id !== ruleId
-    );
+      const config: RulesConfig = {
+        version: "1.0",
+        total_complexity: calculateTotalComplexity(updatedRules),
+        rules: updatedRules,
+      };
 
-    const config: RulesConfig = {
-      version: "1.0",
-      total_complexity: calculateTotalComplexity(updatedRules),
-      rules: updatedRules,
-    };
+      const result = await saveRulesConfig(admin, ownerId, config);
+      if (!result.success) {
+        return json<ActionResponse>({ success: false, error: result.error! });
+      }
 
-    const result = await saveRulesConfig(admin, ownerId, config);
-    if (!result.success) {
-      return json<ActionResponse>({ success: false, error: result.error! });
+      return json<ActionResponse>({ success: true, action: "delete", config });
     }
 
-    return json<ActionResponse>({ success: true, action: "delete", config });
-  }
+    // Handle toggle
+    if (actionType === "toggle") {
+      const ruleId = formData.get("ruleId") as string;
+      const updatedRules = existingConfig.rules.map((rule) =>
+        rule.id === ruleId ? { ...rule, enabled: !rule.enabled } : rule
+      );
 
-  // Handle toggle
-  if (actionType === "toggle") {
-    const ruleId = formData.get("ruleId") as string;
-    const updatedRules = existingConfig.rules.map((rule) =>
-      rule.id === ruleId ? { ...rule, enabled: !rule.enabled } : rule
-    );
+      const config: RulesConfig = {
+        ...existingConfig,
+        rules: updatedRules,
+      };
 
-    const config: RulesConfig = {
-      ...existingConfig,
-      rules: updatedRules,
-    };
+      const result = await saveRulesConfig(admin, ownerId, config);
+      if (!result.success) {
+        return json<ActionResponse>({ success: false, error: result.error! });
+      }
 
-    const result = await saveRulesConfig(admin, ownerId, config);
-    if (!result.success) {
-      return json<ActionResponse>({ success: false, error: result.error! });
+      return json<ActionResponse>({ success: true, action: "toggle", config });
     }
 
-    return json<ActionResponse>({ success: true, action: "toggle", config });
-  }
+    // Handle clear
+    if (actionType === "clear") {
+      const config: RulesConfig = {
+        version: "1.0",
+        total_complexity: 0,
+        rules: [],
+      };
 
-  // Handle clear
-  if (actionType === "clear") {
-    const config: RulesConfig = {
-      version: "1.0",
-      total_complexity: 0,
-      rules: [],
-    };
+      await saveRulesConfig(admin, ownerId, config);
+      return json<ActionResponse>({ success: true, action: "clear" });
+    }
 
-    await saveRulesConfig(admin, ownerId, config);
-    return json<ActionResponse>({ success: true, action: "clear" });
-  }
-
-  return json<ActionResponse>({ success: false, error: "Unknown action" });
+    return json<ActionResponse>({ success: false, error: "Unknown action" });
   } catch (error) {
     console.error("Action error:", error);
     return json<ActionResponse>({
       success: false,
-      error: error instanceof Error ? error.message : "An unexpected error occurred",
+      error:
+        error instanceof Error ? error.message : "An unexpected error occurred",
     });
   }
 };

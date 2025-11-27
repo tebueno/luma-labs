@@ -1,9 +1,34 @@
 # **Product Requirements Document (PRD): LogicFlow**
 
-Version: 1.1  
-Status: Draft  
+Version: 1.2  
+Status: POC Complete  
 Product Name: LogicFlow (Working Title)  
 Tagline: The Visual Checkout Validation Engine for Shopify Plus.
+
+---
+
+## **POC Status (November 2025)**
+
+The proof-of-concept is complete with core functionality working end-to-end:
+
+### ✅ Completed
+- **Multi-rule CRUD** - Create, edit, delete, toggle rules
+- **Visual Condition Builder** - AND/OR logic with multiple conditions per rule
+- **Complexity Budget** - Real-time progress bar showing usage
+- **Shopify Function** - Rust-based validator running at checkout
+- **Metafield Sync** - Rules stored in shop metafield, read by function
+- **Field Support** - Cart total, cart quantity, shipping address (zip, country, city)
+
+### 🚧 Not Yet Implemented
+- Drag-and-drop interface (using modal-based editing instead)
+- Customer tags validation
+- Line item inspection (SKU, vendor, properties)
+- Pre-built regex patterns (PO Box detection, etc.)
+- Test simulator
+- Rule scheduling
+- Analytics
+
+---
 
 ## **1. Executive Summary**
 

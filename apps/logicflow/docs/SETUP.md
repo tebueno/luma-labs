@@ -107,20 +107,33 @@ This starts:
 apps/logicflow/app/
 ├── app/                          # Remix application
 │   ├── routes/
-│   │   ├── app._index.tsx        # Main rule builder UI
-│   │   ├── app.tsx               # App layout
+│   │   ├── app._index.tsx        # Main rule builder UI (slim orchestrator)
+│   │   ├── app.tsx               # App layout with nav
 │   │   └── auth.$.tsx            # OAuth handling
+│   ├── lib/
+│   │   └── rules/                # Rule management modules
+│   │       ├── types.ts          # TypeScript interfaces
+│   │       ├── constants.ts      # Field/operator options
+│   │       ├── utils.ts          # Helpers (complexity, summaries)
+│   │       ├── hooks.ts          # React hooks (useRuleForm, etc.)
+│   │       ├── graphql.server.ts # Admin API helpers
+│   │       └── components/       # UI components
+│   │           ├── RuleList.tsx
+│   │           ├── RuleModal.tsx
+│   │           ├── ConditionBuilder.tsx
+│   │           ├── ConditionRow.tsx
+│   │           ├── DeleteModal.tsx
+│   │           └── StatusSidebar.tsx
 │   ├── shopify.server.ts         # Shopify app configuration
 │   └── db.server.ts              # Prisma client
 ├── extensions/
 │   └── logicflow-validator/      # Shopify Function (Rust)
 │       ├── src/
-│       │   ├── main.rs           # Function entry point
-│       │   ├── evaluator.rs      # Rule evaluation logic
-│       │   └── patterns.rs       # Pattern matching
+│       │   ├── lib.rs            # Function entry point & evaluator
+│       │   └── run.graphql       # Input query (cart + shop metafield)
 │       ├── Cargo.toml            # Rust dependencies
 │       └── shopify.extension.toml
-├── shopify.app.logicflow.toml    # App configuration
+├── shopify.app.toml              # App configuration
 ├── shopify.web.toml              # Web process configuration
 └── vite.config.ts                # Vite configuration
 ```
