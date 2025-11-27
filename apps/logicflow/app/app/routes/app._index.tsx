@@ -49,12 +49,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 // ============================================================================
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
-  const formData = await request.formData();
-  const actionType = formData.get("action") as string;
+  try {
+    const { admin } = await authenticate.admin(request);
+    const formData = await request.formData();
+    const actionType = formData.get("action") as string;
 
-  // Get owner ID for metafield operations
-  const ownerId = await getAppInstallationId(admin);
+    // Get owner ID for metafield operations
+    const ownerId = await getAppInstallationId(admin);
   if (!ownerId) {
     return json<ActionResponse>({
       success: false,
@@ -180,6 +181,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   return json<ActionResponse>({ success: false, error: "Unknown action" });
+  } catch (error) {
+    console.error("Action error:", error);
+    return json<ActionResponse>({
+      success: false,
+      error: error instanceof Error ? error.message : "An unexpected error occurred",
+    });
+  }
 };
 
 // ============================================================================
