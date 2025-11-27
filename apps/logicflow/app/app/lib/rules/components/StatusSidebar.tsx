@@ -1,5 +1,18 @@
-import { Card, BlockStack, Text, Box, Divider, InlineStack } from "@shopify/polaris";
+import {
+  Card,
+  BlockStack,
+  Text,
+  Box,
+  Divider,
+  InlineStack,
+  ProgressBar,
+  Banner,
+} from "@shopify/polaris";
 import type { Rule } from "../types";
+import { COMPLEXITY_BUDGET, DEFAULT_TIER } from "../constants";
+
+// Current budget based on tier (will be dynamic in Phase 4)
+const CURRENT_BUDGET = COMPLEXITY_BUDGET[DEFAULT_TIER];
 
 interface StatusSidebarProps {
   rules: Rule[];
@@ -8,9 +21,62 @@ interface StatusSidebarProps {
 
 export function StatusSidebar({ rules, totalComplexity }: StatusSidebarProps) {
   const activeRulesCount = rules.filter((r) => r.enabled).length;
+  
+  // Calculate budget usage
+  const budgetUsagePercent = Math.min((totalComplexity / CURRENT_BUDGET) * 100, 100);
+  const isNearLimit = budgetUsagePercent >= 80;
+  const isAtLimit = totalComplexity >= CURRENT_BUDGET;
+  const remainingPoints = Math.max(CURRENT_BUDGET - totalComplexity, 0);
+
+  // Determine progress bar color
+  const progressTone = isAtLimit ? "critical" : isNearLimit ? "warning" : "primary";
 
   return (
     <BlockStack gap="400">
+      {/* Complexity Budget Card */}
+      <Card>
+        <BlockStack gap="300">
+          <Text as="h2" variant="headingMd">
+            Complexity Budget
+          </Text>
+          
+          <BlockStack gap="200">
+            <InlineStack align="space-between">
+              <Text as="span" variant="bodySm" tone="subdued">
+                {totalComplexity} / {CURRENT_BUDGET} pts used
+              </Text>
+              <Text as="span" variant="bodySm" fontWeight="semibold">
+                {remainingPoints} remaining
+              </Text>
+            </InlineStack>
+            
+            <ProgressBar
+              progress={budgetUsagePercent}
+              tone={progressTone}
+              size="small"
+            />
+          </BlockStack>
+
+          {isAtLimit && (
+            <Banner tone="critical">
+              Budget exceeded! Disable or remove rules to add more.
+            </Banner>
+          )}
+
+          {isNearLimit && !isAtLimit && (
+            <Banner tone="warning">
+              Approaching budget limit. Consider upgrading for more capacity.
+            </Banner>
+          )}
+
+          <Box paddingBlockStart="100">
+            <Text as="p" variant="bodySm" tone="subdued">
+              Free plan: {COMPLEXITY_BUDGET.FREE} pts
+            </Text>
+          </Box>
+        </BlockStack>
+      </Card>
+
       {/* Status Card */}
       <Card>
         <BlockStack gap="300">
@@ -41,10 +107,10 @@ export function StatusSidebar({ rules, totalComplexity }: StatusSidebarProps) {
           </InlineStack>
           <InlineStack align="space-between">
             <Text as="span" variant="bodySm">
-              Total Complexity
+              Active Rules
             </Text>
             <Text as="span" variant="bodySm" fontWeight="semibold">
-              {totalComplexity} pts
+              {activeRulesCount}
             </Text>
           </InlineStack>
         </BlockStack>
@@ -73,4 +139,3 @@ export function StatusSidebar({ rules, totalComplexity }: StatusSidebarProps) {
     </BlockStack>
   );
 }
-

@@ -46,3 +46,18 @@ export const NUMERIC_OPERATORS = [
   "LESS_THAN_OR_EQUAL",
 ] as const;
 
+// ============================================================================
+// Complexity Budget (by tier)
+// ============================================================================
+
+export const COMPLEXITY_BUDGET = {
+  FREE: 25,
+  STARTER: 100,
+  PRO: Infinity,
+} as const;
+
+export type PlanTier = keyof typeof COMPLEXITY_BUDGET;
+
+// Default tier for MVP (will be dynamic based on subscription in Phase 4)
+export const DEFAULT_TIER: PlanTier = "FREE";
+
