@@ -93,7 +93,7 @@ pub enum ComparisonOperator {
 #[serde(rename_all = "camelCase")]
 struct Input {
     cart: Cart,
-    cart_transform: Option<CartTransform>,
+    shop: Shop,
 }
 
 #[derive(Deserialize)]
@@ -150,8 +150,9 @@ struct DeliveryAddress {
 }
 
 #[derive(Deserialize)]
-struct CartTransform {
-    metafield: Option<Metafield>,
+#[serde(rename_all = "camelCase")]
+struct Shop {
+    rules_config: Option<Metafield>,
 }
 
 #[derive(Deserialize)]
@@ -190,7 +191,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn process_input(input: Input) -> Output {
     // Parse rules configuration from metafield
-    let config = match input.cart_transform.as_ref().and_then(|ct| ct.metafield.as_ref()) {
+    let config = match input.shop.rules_config.as_ref() {
         Some(metafield) => {
             match serde_json::from_str::<RulesConfig>(&metafield.value) {
                 Ok(c) => c,

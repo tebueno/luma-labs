@@ -18,9 +18,9 @@ interface GraphQLResponse<T> {
 // Queries
 // ============================================================================
 
-const GET_APP_INSTALLATION_QUERY = `#graphql
-  query GetAppInstallation {
-    currentAppInstallation {
+const GET_SHOP_ID_QUERY = `#graphql
+  query GetShopId {
+    shop {
       id
     }
   }
@@ -28,7 +28,7 @@ const GET_APP_INSTALLATION_QUERY = `#graphql
 
 const GET_RULES_CONFIG_QUERY = `#graphql
   query GetRulesConfig {
-    currentAppInstallation {
+    shop {
       metafield(namespace: "${METAFIELD_NAMESPACE}", key: "${METAFIELD_KEY}") {
         value
       }
@@ -58,29 +58,35 @@ const SET_RULES_CONFIG_MUTATION = `#graphql
 // ============================================================================
 
 /**
- * Get the app installation ID (used as owner for metafields)
+ * Get the shop ID (used as owner for metafields)
+ * This ensures the metafield is accessible by the Shopify Function
  */
-export async function getAppInstallationId(admin: AdminGraphQL): Promise<string | null> {
-  const response = await admin.graphql(GET_APP_INSTALLATION_QUERY);
+export async function getShopId(admin: AdminGraphQL): Promise<string | null> {
+  const response = await admin.graphql(GET_SHOP_ID_QUERY);
   const data: GraphQLResponse<{
-    currentAppInstallation: { id: string };
+    shop: { id: string };
   }> = await response.json();
   
-  return data.data?.currentAppInstallation?.id || null;
+  return data.data?.shop?.id || null;
+}
+
+// Keep this for backwards compatibility, but it now returns shop ID
+export async function getAppInstallationId(admin: AdminGraphQL): Promise<string | null> {
+  return getShopId(admin);
 }
 
 /**
- * Get the current rules configuration from metafield
+ * Get the current rules configuration from shop metafield
  */
 export async function getRulesConfig(admin: AdminGraphQL): Promise<RulesConfig | null> {
   const response = await admin.graphql(GET_RULES_CONFIG_QUERY);
   const data: GraphQLResponse<{
-    currentAppInstallation: {
+    shop: {
       metafield: { value: string } | null;
     };
   }> = await response.json();
 
-  const configValue = data.data?.currentAppInstallation?.metafield?.value;
+  const configValue = data.data?.shop?.metafield?.value;
   
   if (!configValue) {
     return null;
@@ -107,7 +113,8 @@ export async function getExistingConfig(admin: AdminGraphQL): Promise<RulesConfi
 }
 
 /**
- * Save rules configuration to metafield
+ * Save rules configuration to shop metafield
+ * Using shop as owner ensures the Shopify Function can read it
  */
 export async function saveRulesConfig(
   admin: AdminGraphQL,
@@ -144,4 +151,3 @@ export async function saveRulesConfig(
 
   return { success: true };
 }
-
