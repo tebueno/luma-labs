@@ -1,0 +1,35 @@
+query Input {
+  cart {
+    cost {
+      totalAmount {
+        amount
+      }
+      subtotalAmount {
+        amount
+      }
+    }
+    lines {
+      quantity
+    }
+    buyerIdentity {
+      customer {
+        id
+      }
+    }
+    deliveryGroups {
+      deliveryAddress {
+        address1
+        address2
+        city
+        provinceCode
+        countryCode
+        zip
+      }
+    }
+  }
+  shop {
+    metafield(namespace: "logicflow", key: "rules_config") {
+      value
+    }
+  }
+}

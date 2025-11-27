@@ -4,9 +4,9 @@
 
 LogicFlow is a no-code rule builder that enables Shopify Plus merchants to create complex checkout validation logic without writing code. It consolidates multiple validation rules into a single Shopify Function, bypassing the platform's 5-function limit.
 
-## Status: POC Phase
+## Status: Vertical Slice
 
-Currently validating core technical assumptions before full development.
+POC validated (0.08ms for 50 rules + 5 regex). Now building end-to-end Shopify app.
 
 ## The Problem
 
@@ -38,51 +38,54 @@ LogicFlow provides:
 
 ```
 logicflow/
-├── README.md           # This file
-├── docs/
-│   ├── PRD.md          # Product Requirements
-│   ├── TRD.md          # Technical Requirements
-│   ├── TESTING.md      # Testing Strategy
-│   └── POC-PLAN.md     # POC Implementation Plan
-└── poc/                # Proof of Concept (Rust)
-    ├── Cargo.toml
-    ├── src/
-    │   ├── lib.rs
-    │   ├── models.rs
-    │   ├── evaluator.rs
-    │   └── patterns.rs
-    └── benches/
-        └── performance.rs
+├── README.md               # This file
+├── docs/                   # Documentation
+│   ├── PRD.md              # Product Requirements
+│   ├── TRD.md              # Technical Requirements
+│   ├── TESTING.md          # Testing Strategy
+│   └── POC-PLAN.md         # POC Implementation Plan
+├── poc/                    # Proof of Concept (standalone Rust benchmarks)
+│   ├── Cargo.toml
+│   ├── src/
+│   └── benches/
+└── app/                    # Shopify App (Vertical Slice)
+    ├── README.md           # App setup instructions
+    ├── app/                # Remix frontend
+    │   └── routes/
+    ├── extensions/         # Shopify Function
+    │   └── logicflow-validator/
+    ├── prisma/             # Database schema
+    └── package.json
 ```
 
-## Quick Start (POC)
+## Quick Start
 
-### Prerequisites
+### Option 1: Run the Shopify App (Vertical Slice)
 
-- Rust toolchain (`rustup`)
-- Cargo
+See [app/README.md](./app/README.md) for full setup instructions.
 
-### Run Tests
+```bash
+cd app
+npm install
+npx prisma generate
+shopify app dev
+```
+
+### Option 2: Run POC Benchmarks
 
 ```bash
 cd poc
-cargo test
-```
-
-### Run Benchmarks
-
-```bash
-cd poc
+cargo test --release
 cargo bench
 ```
 
-### Key Benchmarks
+### POC Benchmark Results
 
-| Scenario | Target | 
-|----------|--------|
-| 50 simple rules | <2ms |
-| 50 rules + 5 regex | <4ms |
-| JSON parsing (50 rules) | <0.5ms |
+| Scenario | Target | Actual |
+|----------|--------|--------|
+| 50 simple rules | <2ms | 0.008ms ✅ |
+| 50 rules + 5 regex | <4ms | 0.08ms ✅ |
+| JSON parsing (50 rules) | <0.5ms | 0.07ms ✅ |
 
 ## Pricing Tiers (Planned)
 

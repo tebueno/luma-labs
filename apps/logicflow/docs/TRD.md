@@ -1,8 +1,10 @@
 # **Technical Requirements Document (TRD): LogicFlow**
 
-Version: 1.1  
+Version: 1.2  
 Product: LogicFlow  
 Tech Stack: Node.js (Backend), React (Frontend), Rust (Shopify Function), GraphQL (API).
+
+> **See Also:** [SETUP.md](./SETUP.md) for developer setup, [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common issues.
 
 ## **1. System Architecture**
 
@@ -23,8 +25,8 @@ The system follows a **Configuration-Execution Split** pattern to maintain perfo
 │     ├── Validates regex safety                                      │
 │     └── Serializes into optimized JSON                              │
 │                           ↓                                         │
-│  3. Storage (Shopify Metafields)                                    │
-│     └── JSON stored in app_data.rules_config                        │
+│  3. Storage (Shop Metafield)                                        │
+│     └── JSON stored in shop.metafield(logicflow.rules_config)       │
 └─────────────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -43,7 +45,11 @@ The system follows a **Configuration-Execution Split** pattern to maintain perfo
 
 To ensure the WASM function is fast, the Metafield data must be lightweight.
 
-**Metafield Key:** `app_data.rules_config`
+**Metafield Location:** Shop metafield  
+**Namespace:** `logicflow`  
+**Key:** `rules_config`
+
+> **Important:** We use Shop metafields (not AppInstallation) because Shopify Functions can only read Shop metafields via the `shop.metafield` input query. AppInstallation metafields are not accessible from Functions.
 
 **Schema Structure (JSON):**
 
@@ -91,6 +97,22 @@ To ensure the WASM function is fast, the Metafield data must be lightweight.
 | Private Metafield      | 2 MB         | ~3,000+ rules           |
 
 **Recommendation:** Use standard App Metafield for MVP. If merchants need >100 rules, consider chunking or private metafields.
+
+### **2.2 WASM Binary Size Constraints**
+
+| Constraint | Limit | Impact |
+| ---------- | ----- | ------ |
+| Shopify Function WASM size | **256 KB** | Must keep binary small |
+| `regex` crate | ~500 KB | **Cannot use** - exceeds limit |
+| `regex-lite` crate | ~50 KB | Acceptable alternative |
+| String matching only | ~30 KB | Current vertical slice approach |
+
+**Current Approach:** For the vertical slice, we use simple string matching (contains, starts_with, etc.) instead of regex. This keeps the binary well under the 256KB limit.
+
+**Future Options:**
+1. Use `regex-lite` crate for smaller binary with regex support
+2. Pre-validate regex patterns server-side, use simple matching at runtime
+3. Curate a small set of pre-built patterns only
 
 ## **3. Complexity Points System**
 

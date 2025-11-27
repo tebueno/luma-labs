@@ -23,7 +23,13 @@ Validate the core technical assumption: **Can we evaluate 50+ rules with regex p
 ```bash
 # Install Rust + WASM target
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup target add wasm32-wasi
+source "$HOME/.cargo/env"
+
+# Add WASM target (note: wasm32-wasi is deprecated, use wasip1)
+rustup target add wasm32-wasip1
+
+# Install cargo-wasi for easier builds
+cargo install cargo-wasi
 
 # Install Shopify CLI
 npm install -g @shopify/cli@latest
@@ -32,6 +38,8 @@ npm install -g @shopify/cli@latest
 cargo --version
 shopify version
 ```
+
+> **Note:** See [SETUP.md](./SETUP.md) for complete setup instructions and [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common issues.
 
 **1.2 Create Shopify App**
 
