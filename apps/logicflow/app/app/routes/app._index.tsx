@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
 import { Page, Layout, BlockStack, Banner } from "@shopify/polaris";
 import { PlusIcon } from "@shopify/polaris-icons";
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { authenticate } from "../shopify.server";
 
 // Rules modules
@@ -184,6 +184,20 @@ export default function RulesPage() {
   const rules = config?.rules || [];
   const totalComplexity = config?.total_complexity || 0;
 
+  // Banner dismiss state
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+  const [showErrorBanner, setShowErrorBanner] = useState(false);
+
+  // Show banners when actionData changes
+  useEffect(() => {
+    if (actionData?.success && "action" in actionData) {
+      setShowSuccessBanner(true);
+    }
+    if (actionData && "error" in actionData && actionData.error) {
+      setShowErrorBanner(true);
+    }
+  }, [actionData]);
+
   // Form and modal state
   const {
     formState,
@@ -257,8 +271,8 @@ export default function RulesPage() {
     >
       <BlockStack gap="500">
         {/* Success Banner */}
-        {actionData?.success && "action" in actionData && (
-          <Banner tone="success" onDismiss={() => {}}>
+        {showSuccessBanner && actionData?.success && "action" in actionData && (
+          <Banner tone="success" onDismiss={() => setShowSuccessBanner(false)}>
             {actionData.action === "create" && "Rule created successfully!"}
             {actionData.action === "update" && "Rule updated successfully!"}
             {actionData.action === "delete" && "Rule deleted successfully!"}
@@ -268,11 +282,14 @@ export default function RulesPage() {
         )}
 
         {/* Error Banner */}
-        {actionData && "error" in actionData && actionData.error && (
-          <Banner tone="critical" onDismiss={() => {}}>
-            Error: {actionData.error}
-          </Banner>
-        )}
+        {showErrorBanner &&
+          actionData &&
+          "error" in actionData &&
+          actionData.error && (
+            <Banner tone="critical" onDismiss={() => setShowErrorBanner(false)}>
+              Error: {actionData.error}
+            </Banner>
+          )}
 
         <Layout>
           {/* Main Content */}
