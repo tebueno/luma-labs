@@ -189,6 +189,8 @@ fn compare(
         ComparisonOperator::RegexMatch => compare_regex(field_value, condition_value, is_preset),
         ComparisonOperator::In => compare_in(field_value, condition_value),
         ComparisonOperator::NotIn => !compare_in(field_value, condition_value),
+        ComparisonOperator::IsPoBox => compare_po_box(field_value),
+        ComparisonOperator::IsNotPoBox => !compare_po_box(field_value),
     }
 }
 
@@ -274,6 +276,13 @@ fn compare_in(field_value: &FieldValue, condition_value: &serde_json::Value) -> 
             }),
             _ => false,
         },
+        _ => false,
+    }
+}
+
+fn compare_po_box(field_value: &FieldValue) -> bool {
+    match field_value {
+        FieldValue::String(s) => crate::patterns::is_po_box(s),
         _ => false,
     }
 }

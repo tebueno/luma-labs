@@ -13,6 +13,9 @@ export const FIELD_OPTIONS = [
   { label: "Cart Total ($)", value: "cart.total" },
   { label: "Cart Quantity", value: "cart.quantity" },
   { label: "Cart Weight", value: "cart.total_weight" },
+  { label: "Shipping Address Line 1", value: "shipping_address.address1" },
+  { label: "Shipping Address Line 2", value: "shipping_address.address2" },
+  { label: "Shipping City", value: "shipping_address.city" },
   { label: "Shipping Country Code", value: "shipping_address.country_code" },
   { label: "Shipping Province Code", value: "shipping_address.province_code" },
   { label: "Shipping ZIP", value: "shipping_address.zip" },
@@ -34,6 +37,8 @@ export const OPERATOR_OPTIONS = [
   { label: "Not Contains", value: "NOT_CONTAINS" },
   { label: "Starts With", value: "STARTS_WITH" },
   { label: "Ends With", value: "ENDS_WITH" },
+  { label: "Is PO Box", value: "IS_PO_BOX" },
+  { label: "Is Not PO Box", value: "IS_NOT_PO_BOX" },
 ] as const;
 
 // ============================================================================

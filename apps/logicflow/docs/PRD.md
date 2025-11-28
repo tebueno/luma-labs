@@ -12,6 +12,7 @@ Tagline: The Visual Checkout Validation Engine for Shopify Plus.
 The proof-of-concept is complete with core functionality working end-to-end:
 
 ### ✅ Completed
+
 - **Multi-rule CRUD** - Create, edit, delete, toggle rules
 - **Visual Condition Builder** - AND/OR logic with multiple conditions per rule
 - **Complexity Budget** - Real-time progress bar showing usage
@@ -22,9 +23,11 @@ The proof-of-concept is complete with core functionality working end-to-end:
 - **Test Simulator** - Mock cart testing in sidebar
 
 ### ⚠️ Known Limitations
+
 - **Customer Tags:** Limited to 30 pre-defined tags due to Shopify Functions static query requirement. Custom tags require code change + redeploy. See TROUBLESHOOTING.md for details.
 
 ### 🚧 Not Yet Implemented
+
 - Pre-built patterns (PO Box detection) - **MVP blocker**
 - Line item inspection (SKU, vendor, properties)
 - Drag-and-drop interface (using modal-based editing instead)

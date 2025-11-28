@@ -51,7 +51,16 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
   }, [rules, mockCart]);
 
   const updateCart = useCallback(
-    (field: keyof MockCart | "zip" | "country" | "city", value: string) => {
+    (
+      field:
+        | keyof MockCart
+        | "address1"
+        | "address2"
+        | "city"
+        | "country"
+        | "zip",
+      value: string
+    ) => {
       setMockCart((prev) => {
         if (field === "total") {
           return { ...prev, total: parseFloat(value) || 0 };
@@ -59,7 +68,13 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
         if (field === "quantity") {
           return { ...prev, quantity: parseInt(value, 10) || 0 };
         }
-        if (field === "zip" || field === "country" || field === "city") {
+        if (
+          field === "address1" ||
+          field === "address2" ||
+          field === "city" ||
+          field === "country" ||
+          field === "zip"
+        ) {
           return {
             ...prev,
             shippingAddress: {
@@ -232,23 +247,22 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
               </Text>
 
               <TextField
-                label="ZIP Code"
-                value={mockCart.shippingAddress.zip}
-                onChange={(v) => updateCart("zip", v)}
+                label="Address Line 1"
+                value={mockCart.shippingAddress.address1}
+                onChange={(v) => updateCart("address1", v)}
                 autoComplete="off"
-                placeholder="e.g., 94954"
+                placeholder="e.g., 123 Main St or PO Box 123"
+              />
+
+              <TextField
+                label="Address Line 2"
+                value={mockCart.shippingAddress.address2}
+                onChange={(v) => updateCart("address2", v)}
+                autoComplete="off"
+                placeholder="e.g., Apt 4B"
               />
 
               <InlineStack gap="300" wrap={false}>
-                <div style={{ flex: 1 }}>
-                  <TextField
-                    label="Country"
-                    value={mockCart.shippingAddress.country}
-                    onChange={(v) => updateCart("country", v)}
-                    autoComplete="off"
-                    placeholder="e.g., US"
-                  />
-                </div>
                 <div style={{ flex: 1 }}>
                   <TextField
                     label="City"
@@ -258,7 +272,24 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
                     placeholder="e.g., Petaluma"
                   />
                 </div>
+                <div style={{ flex: 1 }}>
+                  <TextField
+                    label="ZIP Code"
+                    value={mockCart.shippingAddress.zip}
+                    onChange={(v) => updateCart("zip", v)}
+                    autoComplete="off"
+                    placeholder="e.g., 94954"
+                  />
+                </div>
               </InlineStack>
+
+              <TextField
+                label="Country"
+                value={mockCart.shippingAddress.country}
+                onChange={(v) => updateCart("country", v)}
+                autoComplete="off"
+                placeholder="e.g., US"
+              />
             </BlockStack>
 
             {/* Run Button */}

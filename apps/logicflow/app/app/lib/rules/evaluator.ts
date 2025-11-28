@@ -13,9 +13,11 @@ export interface MockCart {
   quantity: number;
   customerTags: string[];
   shippingAddress: {
-    zip: string;
-    country: string;
+    address1: string;
+    address2: string;
     city: string;
+    country: string;
+    zip: string;
   };
 }
 
@@ -24,11 +26,24 @@ export const DEFAULT_MOCK_CART: MockCart = {
   quantity: 1,
   customerTags: [],
   shippingAddress: {
-    zip: "",
-    country: "US",
+    address1: "",
+    address2: "",
     city: "",
+    country: "US",
+    zip: "",
   },
 };
+
+// PO Box detection helper (mirrors Rust patterns.rs)
+export function isPOBox(text: string): boolean {
+  const lower = text.toLowerCase();
+  return (
+    lower.includes("po box") ||
+    lower.includes("p.o. box") ||
+    lower.includes("p o box") ||
+    lower.includes("post office box")
+  );
+}
 
 // Supported customer tags (must match GraphQL query in run.graphql)
 // These are common tags used by Shopify merchants for checkout validation
@@ -105,12 +120,17 @@ function getFieldValue(field: string, cart: MockCart): FieldValue {
       return cart.quantity;
     case "customer.tags":
       return cart.customerTags;
-    case "shipping_address.zip":
-      return cart.shippingAddress.zip;
-    case "shipping_address.country":
-      return cart.shippingAddress.country;
+    case "shipping_address.address1":
+      return cart.shippingAddress.address1;
+    case "shipping_address.address2":
+      return cart.shippingAddress.address2;
     case "shipping_address.city":
       return cart.shippingAddress.city;
+    case "shipping_address.country":
+    case "shipping_address.country_code":
+      return cart.shippingAddress.country;
+    case "shipping_address.zip":
+      return cart.shippingAddress.zip;
     default:
       return undefined;
   }
@@ -124,12 +144,17 @@ function getFieldLabel(field: string): string {
       return "Cart Quantity";
     case "customer.tags":
       return "Customer Tags";
-    case "shipping_address.zip":
-      return "ZIP Code";
-    case "shipping_address.country":
-      return "Country";
+    case "shipping_address.address1":
+      return "Address Line 1";
+    case "shipping_address.address2":
+      return "Address Line 2";
     case "shipping_address.city":
       return "City";
+    case "shipping_address.country":
+    case "shipping_address.country_code":
+      return "Country";
+    case "shipping_address.zip":
+      return "ZIP Code";
     default:
       return field;
   }
@@ -157,6 +182,10 @@ function getOperatorLabel(operator: string): string {
       return "starts with";
     case "ENDS_WITH":
       return "ends with";
+    case "IS_PO_BOX":
+      return "is PO Box";
+    case "IS_NOT_PO_BOX":
+      return "is not PO Box";
     default:
       return operator;
   }
@@ -270,7 +299,19 @@ function evaluateCondition(
       case "ENDS_WITH":
         conditionMet = strField.endsWith(strTarget);
         break;
+      case "IS_PO_BOX":
+        conditionMet = isPOBox(fieldValue);
+        break;
+      case "IS_NOT_PO_BOX":
+        conditionMet = !isPOBox(fieldValue);
+        break;
     }
+  }
+
+  // For PO Box operators, build a cleaner description
+  if (condition.operator === "IS_PO_BOX" || condition.operator === "IS_NOT_PO_BOX") {
+    const poBoxDescription = `${fieldLabel} ${opLabel}`;
+    return { passed: conditionMet, description: poBoxDescription };
   }
 
   return { passed: conditionMet, description };
