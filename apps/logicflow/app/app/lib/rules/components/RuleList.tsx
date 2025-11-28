@@ -19,8 +19,6 @@ import {
   CartIcon,
   LocationIcon,
   PersonIcon,
-  CheckIcon,
-  XIcon,
 } from "@shopify/polaris-icons";
 import type { Rule } from "../types";
 import { getRuleSummary } from "../utils";
@@ -210,35 +208,18 @@ export function RuleList({
   const totalCount = rules.length;
 
   return (
-    <BlockStack gap="400">
+    <BlockStack gap="300">
       {/* Summary header */}
-      <Card>
-        <InlineStack align="space-between" blockAlign="center">
-          <InlineStack gap="400" blockAlign="center">
-            <BlockStack gap="050">
-              <Text as="span" variant="headingMd">
-                Validation Rules
-              </Text>
-              <Text as="span" variant="bodySm" tone="subdued">
-                {activeCount} of {totalCount} rule{totalCount !== 1 ? "s" : ""} active
-              </Text>
-            </BlockStack>
-          </InlineStack>
-          <InlineStack gap="200">
-            {activeCount > 0 && (
-              <Badge tone="success">
-                <InlineStack gap="100" blockAlign="center">
-                  <Icon source={CheckIcon} />
-                  <span>Protected</span>
-                </InlineStack>
-              </Badge>
-            )}
-            {activeCount === 0 && (
-              <Badge tone="warning">No active rules</Badge>
-            )}
-          </InlineStack>
-        </InlineStack>
-      </Card>
+      <InlineStack align="space-between" blockAlign="center">
+        <Text as="span" variant="headingMd">
+          {totalCount} Rule{totalCount !== 1 ? "s" : ""}
+        </Text>
+        {activeCount > 0 ? (
+          <Badge tone="success">{activeCount} active</Badge>
+        ) : (
+          <Badge tone="warning">None active</Badge>
+        )}
+      </InlineStack>
 
       {/* Rule list */}
       <Card padding="0">
@@ -281,17 +262,10 @@ interface RuleListItemProps {
 
 function RuleListItem({ rule, onEdit, onToggle, onDelete }: RuleListItemProps) {
   const { id, name, enabled, error_message, complexity } = rule;
-  const conditionCount = rule.conditions.criteria.length;
 
   return (
     <ResourceItem id={id} onClick={() => onEdit(rule)}>
-      <div
-        style={{
-          display: "flex",
-          gap: "12px",
-          alignItems: "stretch",
-        }}
-      >
+      <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
         {/* Status indicator strip */}
         <div
           style={{
@@ -299,109 +273,68 @@ function RuleListItem({ rule, onEdit, onToggle, onDelete }: RuleListItemProps) {
             borderRadius: "2px",
             backgroundColor: enabled ? "#008060" : "#c9cccf",
             alignSelf: "stretch",
-            minHeight: "60px",
-            transition: "background-color 0.15s ease",
+            minHeight: "48px",
           }}
         />
 
         {/* Main content */}
-        <Box width="100%">
-          <InlineStack align="space-between" blockAlign="start">
-            <BlockStack gap="200">
-              {/* Title row with status */}
-              <InlineStack gap="200" blockAlign="center">
-                <Text as="span" variant="bodyMd" fontWeight="bold">
-                  {name}
-                </Text>
-                {enabled ? (
-                  <Badge tone="success">
-                    <InlineStack gap="100" blockAlign="center">
-                      <Icon source={CheckIcon} />
-                      <span>Active</span>
-                    </InlineStack>
-                  </Badge>
-                ) : (
-                  <Badge>Disabled</Badge>
-                )}
-              </InlineStack>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Row 1: Name + Badge + Actions */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+              <Text as="span" variant="bodyMd" fontWeight="semibold">
+                {name}
+              </Text>
+              <Badge tone={enabled ? "success" : undefined}>
+                {enabled ? "Active" : "Disabled"}
+              </Badge>
+              <Text as="span" variant="bodySm" tone="subdued">
+                {complexity} pt{complexity !== 1 ? "s" : ""}
+              </Text>
+            </div>
+            
+            {/* Action buttons - fixed on right */}
+            <div style={{ display: "flex", gap: "4px", flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+              <Tooltip content={enabled ? "Disable rule" : "Enable rule"}>
+                <Button
+                  icon={enabled ? HideIcon : ViewIcon}
+                  variant="plain"
+                  onClick={() => onToggle(id)}
+                  accessibilityLabel={enabled ? `Disable ${name}` : `Enable ${name}`}
+                />
+              </Tooltip>
+              <Tooltip content="Edit rule">
+                <Button
+                  icon={EditIcon}
+                  variant="plain"
+                  onClick={() => onEdit(rule)}
+                  accessibilityLabel={`Edit ${name}`}
+                />
+              </Tooltip>
+              <Tooltip content="Delete rule">
+                <Button
+                  icon={DeleteIcon}
+                  variant="plain"
+                  tone="critical"
+                  onClick={() => onDelete(id)}
+                  accessibilityLabel={`Delete ${name}`}
+                />
+              </Tooltip>
+            </div>
+          </div>
 
-              {/* Rule summary */}
-              <Box>
-                <InlineStack gap="100" blockAlign="center" wrap={false}>
-                  <Text as="span" variant="bodySm" tone="subdued">
-                    {getRuleSummary(rule)}
-                  </Text>
-                  <Text as="span" variant="bodySm" tone="subdued">
-                    •
-                  </Text>
-                  <Text as="span" variant="bodySm" tone="subdued">
-                    {conditionCount} condition{conditionCount !== 1 ? "s" : ""}
-                  </Text>
-                  <Text as="span" variant="bodySm" tone="subdued">
-                    •
-                  </Text>
-                  <Text as="span" variant="bodySm" tone="subdued">
-                    {complexity} pt{complexity !== 1 ? "s" : ""}
-                  </Text>
-                </InlineStack>
-              </Box>
+          {/* Row 2: Rule summary */}
+          <div style={{ marginTop: "4px" }}>
+            <Text as="span" variant="bodySm" tone="subdued">
+              {getRuleSummary(rule)}
+            </Text>
+          </div>
 
-              {/* Error message preview */}
-              <div
-                style={{
-                  padding: "8px 12px",
-                  backgroundColor: "#f6f6f7",
-                  borderRadius: "6px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <div style={{ flexShrink: 0 }}>
-                  <Icon source={XIcon} tone="critical" />
-                </div>
-                <Text as="span" variant="bodySm">
-                  "{error_message}"
-                </Text>
-              </div>
-            </BlockStack>
-
-            {/* Action buttons */}
-            <InlineStack gap="100" blockAlign="start">
-              <div onClick={(e) => e.stopPropagation()}>
-                <Tooltip content={enabled ? "Disable rule" : "Enable rule"}>
-                  <Button
-                    icon={enabled ? HideIcon : ViewIcon}
-                    variant="tertiary"
-                    onClick={() => onToggle(id)}
-                    accessibilityLabel={enabled ? `Disable ${name}` : `Enable ${name}`}
-                  />
-                </Tooltip>
-              </div>
-              <div onClick={(e) => e.stopPropagation()}>
-                <Tooltip content="Edit rule">
-                  <Button
-                    icon={EditIcon}
-                    variant="tertiary"
-                    onClick={() => onEdit(rule)}
-                    accessibilityLabel={`Edit ${name}`}
-                  />
-                </Tooltip>
-              </div>
-              <div onClick={(e) => e.stopPropagation()}>
-                <Tooltip content="Delete rule">
-                  <Button
-                    icon={DeleteIcon}
-                    variant="tertiary"
-                    tone="critical"
-                    onClick={() => onDelete(id)}
-                    accessibilityLabel={`Delete ${name}`}
-                  />
-                </Tooltip>
-              </div>
-            </InlineStack>
-          </InlineStack>
-        </Box>
+          {/* Row 3: Error message */}
+          <div style={{ marginTop: "6px", color: "#6d7175", fontSize: "13px" }}>
+            → "{error_message}"
+          </div>
+        </div>
       </div>
     </ResourceItem>
   );
