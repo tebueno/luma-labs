@@ -18,13 +18,16 @@ The proof-of-concept is complete with core functionality working end-to-end:
 - **Shopify Function** - Rust-based validator running at checkout
 - **Metafield Sync** - Rules stored in shop metafield, read by function
 - **Field Support** - Cart total, cart quantity, shipping address (zip, country, city)
+- **Customer Tags** - 30 pre-defined tags (see Known Limitations)
+- **Test Simulator** - Mock cart testing in sidebar
+
+### ⚠️ Known Limitations
+- **Customer Tags:** Limited to 30 pre-defined tags due to Shopify Functions static query requirement. Custom tags require code change + redeploy. See TROUBLESHOOTING.md for details.
 
 ### 🚧 Not Yet Implemented
-- Drag-and-drop interface (using modal-based editing instead)
-- Customer tags validation
+- Pre-built patterns (PO Box detection) - **MVP blocker**
 - Line item inspection (SKU, vendor, properties)
-- Pre-built regex patterns (PO Box detection, etc.)
-- Test simulator
+- Drag-and-drop interface (using modal-based editing instead)
 - Rule scheduling
 - Analytics
 
