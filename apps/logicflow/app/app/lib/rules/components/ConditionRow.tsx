@@ -9,8 +9,16 @@ import {
   Icon,
   Text,
   BlockStack,
+  Badge,
 } from "@shopify/polaris";
-import { DeleteIcon, AlertTriangleIcon } from "@shopify/polaris-icons";
+import {
+  DeleteIcon,
+  AlertTriangleIcon,
+  CartIcon,
+  LocationIcon,
+  PersonIcon,
+  HashtagIcon,
+} from "@shopify/polaris-icons";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   FIELD_OPTIONS,
@@ -27,11 +35,34 @@ import type { ConditionFormData } from "../types";
 
 export type { ConditionFormData } from "../types";
 
+// ============================================================================
+// Field Icon Mapping
+// ============================================================================
+
+const FIELD_ICONS: Record<string, typeof CartIcon> = {
+  "cart.total": CartIcon,
+  "cart.quantity": CartIcon,
+  "cart.total_weight": CartIcon,
+  "shipping_address.address1": LocationIcon,
+  "shipping_address.address2": LocationIcon,
+  "shipping_address.city": LocationIcon,
+  "shipping_address.country_code": LocationIcon,
+  "shipping_address.province_code": LocationIcon,
+  "shipping_address.zip": LocationIcon,
+  "customer.tags": PersonIcon,
+};
+
+function getFieldIcon(field: string) {
+  return FIELD_ICONS[field] || HashtagIcon;
+}
+
 interface ConditionRowProps {
   condition: ConditionFormData;
   onChange: (id: string, updates: Partial<ConditionFormData>) => void;
   onRemove: (id: string) => void;
   canRemove: boolean;
+  showIndex?: boolean;
+  index?: number;
 }
 
 export function ConditionRow({
@@ -39,11 +70,16 @@ export function ConditionRow({
   onChange,
   onRemove,
   canRemove,
+  showIndex = false,
+  index = 1,
 }: ConditionRowProps) {
   const [tagInputValue, setTagInputValue] = useState(condition.value);
   const [previousFieldType, setPreviousFieldType] = useState<FieldType | null>(
     null
   );
+  
+  // Get icon for current field
+  const FieldIcon = getFieldIcon(condition.field);
 
   // Get field type for current field
   const fieldType: FieldType = FIELD_TYPES[condition.field] || "string";
@@ -222,9 +258,37 @@ export function ConditionRow({
   };
 
   return (
-    <Box padding="300" background="bg-surface-secondary" borderRadius="200">
-      <InlineStack gap="200" align="start" blockAlign="start" wrap={false}>
-        <Box minWidth="180px">
+    <Box padding="300" background="bg-surface" borderRadius="200">
+      <InlineStack gap="300" align="start" blockAlign="center" wrap={false}>
+        {/* Condition number badge (optional) */}
+        {showIndex && (
+          <Box>
+            <div
+              style={{
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                backgroundColor: "#e4e5e7",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "12px",
+                fontWeight: 600,
+                color: "#6d7175",
+              }}
+            >
+              {index}
+            </div>
+          </Box>
+        )}
+        
+        {/* Field icon */}
+        <Box>
+          <Icon source={FieldIcon} tone="subdued" />
+        </Box>
+        
+        {/* Field selector */}
+        <Box minWidth="170px">
           <Select
             label="Field"
             labelHidden
@@ -233,7 +297,9 @@ export function ConditionRow({
             onChange={handleFieldChange}
           />
         </Box>
-        <Box minWidth="160px">
+        
+        {/* Operator selector */}
+        <Box minWidth="150px">
           <Select
             label="Operator"
             labelHidden
@@ -242,7 +308,11 @@ export function ConditionRow({
             onChange={(value) => onChange(condition.id, { operator: value })}
           />
         </Box>
-        <Box minWidth="140px">{renderValueInput()}</Box>
+        
+        {/* Value input */}
+        <Box minWidth="130px">{renderValueInput()}</Box>
+        
+        {/* Delete button */}
         {canRemove && (
           <Button
             icon={DeleteIcon}

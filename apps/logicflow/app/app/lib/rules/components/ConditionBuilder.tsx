@@ -4,9 +4,10 @@ import {
   Button,
   Text,
   Box,
-  ButtonGroup,
+  Badge,
+  Icon,
 } from "@shopify/polaris";
-import { PlusIcon } from "@shopify/polaris-icons";
+import { PlusIcon, AlertCircleIcon } from "@shopify/polaris-icons";
 import {
   ConditionRow,
   createDefaultCondition,
@@ -21,6 +22,118 @@ interface ConditionBuilderProps {
   onConditionsChange: (conditions: ConditionFormData[]) => void;
   onLogicalOperatorChange: (operator: LogicalOperator) => void;
 }
+
+// ============================================================================
+// Logical Operator Toggle Component
+// ============================================================================
+
+interface LogicalOperatorToggleProps {
+  value: LogicalOperator;
+  onChange: (operator: LogicalOperator) => void;
+}
+
+function LogicalOperatorToggle({ value, onChange }: LogicalOperatorToggleProps) {
+  return (
+    <Box paddingBlock="100">
+      <InlineStack gap="200" blockAlign="center">
+        {/* Left connector line */}
+        <Box
+          background="bg-fill-tertiary"
+          minWidth="40px"
+          minHeight="2px"
+          borderRadius="100"
+        />
+        
+        {/* Toggle buttons */}
+        <InlineStack gap="0">
+          <button
+            type="button"
+            onClick={() => onChange("AND")}
+            style={{
+              padding: "6px 14px",
+              fontSize: "12px",
+              fontWeight: 600,
+              border: "none",
+              borderRadius: "6px 0 0 6px",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+              backgroundColor: value === "AND" ? "#5c6ac4" : "#f1f2f4",
+              color: value === "AND" ? "white" : "#6d7175",
+            }}
+          >
+            AND
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange("OR")}
+            style={{
+              padding: "6px 14px",
+              fontSize: "12px",
+              fontWeight: 600,
+              border: "none",
+              borderRadius: "0 6px 6px 0",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+              backgroundColor: value === "OR" ? "#5c6ac4" : "#f1f2f4",
+              color: value === "OR" ? "white" : "#6d7175",
+            }}
+          >
+            OR
+          </button>
+        </InlineStack>
+        
+        {/* Right connector line */}
+        <Box
+          background="bg-fill-tertiary"
+          minWidth="40px"
+          minHeight="2px"
+          borderRadius="100"
+        />
+      </InlineStack>
+    </Box>
+  );
+}
+
+// ============================================================================
+// Logic Explanation Banner
+// ============================================================================
+
+interface LogicExplanationProps {
+  operator: LogicalOperator;
+  conditionCount: number;
+}
+
+function LogicExplanation({ operator, conditionCount }: LogicExplanationProps) {
+  if (conditionCount <= 1) return null;
+  
+  const isAnd = operator === "AND";
+  
+  return (
+    <Box
+      padding="300"
+      background={isAnd ? "bg-surface-warning" : "bg-surface-info"}
+      borderRadius="200"
+    >
+      <InlineStack gap="200" blockAlign="center" wrap={false}>
+        <Icon source={AlertCircleIcon} tone={isAnd ? "caution" : "info"} />
+        <BlockStack gap="050">
+          <Text as="span" variant="bodySm" fontWeight="semibold">
+            {isAnd ? "Strict matching (AND)" : "Flexible matching (OR)"}
+          </Text>
+          <Text as="span" variant="bodySm" tone="subdued">
+            {isAnd
+              ? `All ${conditionCount} conditions must be true to block checkout`
+              : `Any 1 of ${conditionCount} conditions will block checkout`}
+          </Text>
+        </BlockStack>
+      </InlineStack>
+    </Box>
+  );
+}
+
+// ============================================================================
+// Main Condition Builder
+// ============================================================================
 
 export function ConditionBuilder({
   conditions,
@@ -48,77 +161,60 @@ export function ConditionBuilder({
   };
 
   return (
-    <BlockStack gap="300">
-      <Text as="h3" variant="headingSm">
-        Conditions
-      </Text>
+    <BlockStack gap="400">
+      {/* Header */}
+      <InlineStack align="space-between" blockAlign="center">
+        <Text as="h3" variant="headingSm">
+          When these conditions are met
+        </Text>
+        <Badge tone="info">{conditions.length} condition{conditions.length !== 1 ? "s" : ""}</Badge>
+      </InlineStack>
 
-      <BlockStack gap="200">
-        {conditions.map((condition, index) => (
-          <BlockStack gap="200" key={condition.id}>
-            <ConditionRow
-              condition={condition}
-              onChange={handleConditionChange}
-              onRemove={handleRemoveCondition}
-              canRemove={conditions.length > 1}
-            />
+      {/* Condition Cards with Visual Flow */}
+      <Box
+        padding="400"
+        background="bg-surface-secondary"
+        borderRadius="300"
+        borderColor="border"
+        borderWidth="025"
+      >
+        <BlockStack gap="0">
+          {conditions.map((condition, index) => (
+            <BlockStack gap="0" key={condition.id}>
+              {/* Condition Row */}
+              <ConditionRow
+                condition={condition}
+                onChange={handleConditionChange}
+                onRemove={handleRemoveCondition}
+                canRemove={conditions.length > 1}
+                showIndex={conditions.length > 1}
+                index={index + 1}
+              />
 
-            {/* Show logical operator between conditions */}
-            {index < conditions.length - 1 && (
-              <Box paddingInlineStart="400">
-                <InlineStack gap="200" blockAlign="center">
-                  <Box
-                    borderColor="border"
-                    borderWidth="025"
-                    borderBlockEndWidth="0"
-                    minWidth="20px"
-                  />
-                  <ButtonGroup variant="segmented">
-                    <Button
-                      pressed={logicalOperator === "AND"}
-                      onClick={() => onLogicalOperatorChange("AND")}
-                      size="slim"
-                    >
-                      AND
-                    </Button>
-                    <Button
-                      pressed={logicalOperator === "OR"}
-                      onClick={() => onLogicalOperatorChange("OR")}
-                      size="slim"
-                    >
-                      OR
-                    </Button>
-                  </ButtonGroup>
-                  <Box
-                    borderColor="border"
-                    borderWidth="025"
-                    borderBlockEndWidth="0"
-                    minWidth="20px"
-                  />
-                </InlineStack>
-              </Box>
-            )}
-          </BlockStack>
-        ))}
-      </BlockStack>
+              {/* Logical Operator Toggle between conditions */}
+              {index < conditions.length - 1 && (
+                <LogicalOperatorToggle
+                  value={logicalOperator}
+                  onChange={onLogicalOperatorChange}
+                />
+              )}
+            </BlockStack>
+          ))}
+        </BlockStack>
 
-      <Button icon={PlusIcon} onClick={handleAddCondition} variant="plain">
-        Add condition
-      </Button>
-
-      {conditions.length > 1 && (
-        <Box
-          padding="200"
-          background="bg-surface-info"
-          borderRadius="100"
-        >
-          <Text as="p" variant="bodySm" tone="subdued">
-            {logicalOperator === "AND"
-              ? "All conditions must match to block checkout"
-              : "Any condition matching will block checkout"}
-          </Text>
+        {/* Add Condition Button */}
+        <Box paddingBlockStart="300">
+          <Button icon={PlusIcon} onClick={handleAddCondition} variant="plain">
+            Add another condition
+          </Button>
         </Box>
-      )}
+      </Box>
+
+      {/* Logic Explanation */}
+      <LogicExplanation
+        operator={logicalOperator}
+        conditionCount={conditions.length}
+      />
     </BlockStack>
   );
 }
