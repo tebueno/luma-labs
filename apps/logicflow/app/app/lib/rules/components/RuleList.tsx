@@ -206,8 +206,41 @@ export function RuleList({
     return <RuleListEmptyState onAddRule={onAddRule} />;
   }
 
+  const activeCount = rules.filter((r) => r.enabled).length;
+  const totalCount = rules.length;
+
   return (
-    <>
+    <BlockStack gap="400">
+      {/* Summary header */}
+      <Card>
+        <InlineStack align="space-between" blockAlign="center">
+          <InlineStack gap="400" blockAlign="center">
+            <BlockStack gap="050">
+              <Text as="span" variant="headingMd">
+                Validation Rules
+              </Text>
+              <Text as="span" variant="bodySm" tone="subdued">
+                {activeCount} of {totalCount} rule{totalCount !== 1 ? "s" : ""} active
+              </Text>
+            </BlockStack>
+          </InlineStack>
+          <InlineStack gap="200">
+            {activeCount > 0 && (
+              <Badge tone="success">
+                <InlineStack gap="100" blockAlign="center">
+                  <Icon source={CheckIcon} />
+                  <span>Protected</span>
+                </InlineStack>
+              </Badge>
+            )}
+            {activeCount === 0 && (
+              <Badge tone="warning">No active rules</Badge>
+            )}
+          </InlineStack>
+        </InlineStack>
+      </Card>
+
+      {/* Rule list */}
       <Card padding="0">
         <ResourceList
           resourceName={{ singular: "rule", plural: "rules" }}
@@ -223,14 +256,15 @@ export function RuleList({
         />
       </Card>
 
-      <Box paddingBlockStart="400">
+      {/* Footer actions */}
+      <Box>
         <InlineStack align="end">
           <Button tone="critical" variant="plain" onClick={onClearAll}>
             Clear All Rules
           </Button>
         </InlineStack>
       </Box>
-    </>
+    </BlockStack>
   );
 }
 
@@ -247,61 +281,123 @@ interface RuleListItemProps {
 
 function RuleListItem({ rule, onEdit, onToggle, onDelete }: RuleListItemProps) {
   const { id, name, enabled, error_message, complexity } = rule;
+  const conditionCount = rule.conditions.criteria.length;
 
   return (
     <ResourceItem id={id} onClick={() => onEdit(rule)}>
-      <InlineStack align="space-between" blockAlign="center">
-        <BlockStack gap="100">
-          <InlineStack gap="200" blockAlign="center">
-            <Text as="span" variant="bodyMd" fontWeight="semibold">
-              {name}
-            </Text>
-            <Badge tone={enabled ? "success" : undefined}>
-              {enabled ? "Active" : "Disabled"}
-            </Badge>
-            <Badge tone="info">{`${complexity} pts`}</Badge>
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          alignItems: "stretch",
+        }}
+      >
+        {/* Status indicator strip */}
+        <div
+          style={{
+            width: "4px",
+            borderRadius: "2px",
+            backgroundColor: enabled ? "#008060" : "#c9cccf",
+            alignSelf: "stretch",
+            minHeight: "60px",
+            transition: "background-color 0.15s ease",
+          }}
+        />
+
+        {/* Main content */}
+        <Box width="100%">
+          <InlineStack align="space-between" blockAlign="start">
+            <BlockStack gap="200">
+              {/* Title row with status */}
+              <InlineStack gap="200" blockAlign="center">
+                <Text as="span" variant="bodyMd" fontWeight="bold">
+                  {name}
+                </Text>
+                {enabled ? (
+                  <Badge tone="success">
+                    <InlineStack gap="100" blockAlign="center">
+                      <Icon source={CheckIcon} />
+                      <span>Active</span>
+                    </InlineStack>
+                  </Badge>
+                ) : (
+                  <Badge>Disabled</Badge>
+                )}
+              </InlineStack>
+
+              {/* Rule summary */}
+              <Box>
+                <InlineStack gap="100" blockAlign="center" wrap={false}>
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    {getRuleSummary(rule)}
+                  </Text>
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    •
+                  </Text>
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    {conditionCount} condition{conditionCount !== 1 ? "s" : ""}
+                  </Text>
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    •
+                  </Text>
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    {complexity} pt{complexity !== 1 ? "s" : ""}
+                  </Text>
+                </InlineStack>
+              </Box>
+
+              {/* Error message preview */}
+              <Box
+                padding="200"
+                background="bg-surface-secondary"
+                borderRadius="100"
+              >
+                <InlineStack gap="100" blockAlign="center" wrap={false}>
+                  <Icon source={XIcon} tone="critical" />
+                  <Text as="span" variant="bodySm">
+                    "{error_message}"
+                  </Text>
+                </InlineStack>
+              </Box>
+            </BlockStack>
+
+            {/* Action buttons */}
+            <InlineStack gap="100" blockAlign="start">
+              <div onClick={(e) => e.stopPropagation()}>
+                <Tooltip content={enabled ? "Disable rule" : "Enable rule"}>
+                  <Button
+                    icon={enabled ? HideIcon : ViewIcon}
+                    variant="tertiary"
+                    onClick={() => onToggle(id)}
+                    accessibilityLabel={enabled ? `Disable ${name}` : `Enable ${name}`}
+                  />
+                </Tooltip>
+              </div>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Tooltip content="Edit rule">
+                  <Button
+                    icon={EditIcon}
+                    variant="tertiary"
+                    onClick={() => onEdit(rule)}
+                    accessibilityLabel={`Edit ${name}`}
+                  />
+                </Tooltip>
+              </div>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Tooltip content="Delete rule">
+                  <Button
+                    icon={DeleteIcon}
+                    variant="tertiary"
+                    tone="critical"
+                    onClick={() => onDelete(id)}
+                    accessibilityLabel={`Delete ${name}`}
+                  />
+                </Tooltip>
+              </div>
+            </InlineStack>
           </InlineStack>
-          <Text as="span" variant="bodySm" tone="subdued">
-            {getRuleSummary(rule)}
-          </Text>
-          <Text as="span" variant="bodySm" tone="subdued">
-            Error: "{error_message}"
-          </Text>
-        </BlockStack>
-        <InlineStack gap="300" blockAlign="center">
-          <div onClick={(e) => e.stopPropagation()}>
-            <Tooltip content={enabled ? "Disable rule" : "Enable rule"}>
-              <Button
-                icon={enabled ? HideIcon : ViewIcon}
-                variant="plain"
-                onClick={() => onToggle(id)}
-                accessibilityLabel={enabled ? `Disable ${name}` : `Enable ${name}`}
-              />
-            </Tooltip>
-          </div>
-          <div onClick={(e) => e.stopPropagation()}>
-            <Tooltip content="Edit rule">
-              <Button
-                icon={EditIcon}
-                variant="plain"
-                onClick={() => onEdit(rule)}
-                accessibilityLabel={`Edit ${name}`}
-              />
-            </Tooltip>
-          </div>
-          <div onClick={(e) => e.stopPropagation()}>
-            <Tooltip content="Delete rule">
-              <Button
-                icon={DeleteIcon}
-                variant="plain"
-                tone="critical"
-                onClick={() => onDelete(id)}
-                accessibilityLabel={`Delete ${name}`}
-              />
-            </Tooltip>
-          </div>
-        </InlineStack>
-      </InlineStack>
+        </Box>
+      </div>
     </ResourceItem>
   );
 }
