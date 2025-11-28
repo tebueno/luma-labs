@@ -11,16 +11,21 @@ import {
   Badge,
   Box,
   Divider,
+  Tag,
+  Popover,
+  ActionList,
 } from "@shopify/polaris";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   PlayIcon,
+  PlusIcon,
 } from "@shopify/polaris-icons";
 import type { Rule } from "../types";
 import {
   evaluateRules,
   DEFAULT_MOCK_CART,
+  SUPPORTED_CUSTOMER_TAGS,
   type MockCart,
   type TestResults,
 } from "../evaluator";
@@ -33,6 +38,7 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mockCart, setMockCart] = useState<MockCart>(DEFAULT_MOCK_CART);
   const [results, setResults] = useState<TestResults | null>(null);
+  const [tagPopoverActive, setTagPopoverActive] = useState(false);
 
   const enabledRulesCount = rules.filter((r) => r.enabled).length;
 
@@ -69,6 +75,27 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
       setResults(null);
     },
     []
+  );
+
+  const addTag = useCallback((tag: string) => {
+    setMockCart((prev) => {
+      if (prev.customerTags.includes(tag)) return prev;
+      return { ...prev, customerTags: [...prev.customerTags, tag] };
+    });
+    setTagPopoverActive(false);
+    setResults(null);
+  }, []);
+
+  const removeTag = useCallback((tag: string) => {
+    setMockCart((prev) => ({
+      ...prev,
+      customerTags: prev.customerTags.filter((t) => t !== tag),
+    }));
+    setResults(null);
+  }, []);
+
+  const availableTags = SUPPORTED_CUSTOMER_TAGS.filter(
+    (tag) => !mockCart.customerTags.includes(tag)
   );
 
   return (
@@ -126,6 +153,46 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
                     min={0}
                   />
                 </div>
+              </InlineStack>
+
+              <Text as="h3" variant="headingSm" tone="subdued">
+                Customer Tags
+              </Text>
+
+              <InlineStack gap="200" wrap>
+                {mockCart.customerTags.map((tag) => (
+                  <Tag key={tag} onRemove={() => removeTag(tag)}>
+                    {tag}
+                  </Tag>
+                ))}
+                {availableTags.length > 0 && (
+                  <Popover
+                    active={tagPopoverActive}
+                    activator={
+                      <Button
+                        size="micro"
+                        icon={PlusIcon}
+                        onClick={() => setTagPopoverActive(true)}
+                      >
+                        Add tag
+                      </Button>
+                    }
+                    onClose={() => setTagPopoverActive(false)}
+                  >
+                    <ActionList
+                      items={availableTags.map((tag) => ({
+                        content: tag,
+                        onAction: () => addTag(tag),
+                      }))}
+                    />
+                  </Popover>
+                )}
+                {mockCart.customerTags.length === 0 &&
+                  availableTags.length === SUPPORTED_CUSTOMER_TAGS.length && (
+                    <Text as="span" variant="bodySm" tone="subdued">
+                      No tags (guest checkout)
+                    </Text>
+                  )}
               </InlineStack>
 
               <Text as="h3" variant="headingSm" tone="subdued">

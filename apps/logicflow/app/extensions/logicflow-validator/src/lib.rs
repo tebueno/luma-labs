@@ -128,8 +128,17 @@ struct BuyerIdentity {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct Customer {
     id: Option<String>,
+    has_tags: Option<Vec<HasTag>>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct HasTag {
+    has_tag: bool,
+    tag: String,
 }
 
 #[derive(Deserialize)]
@@ -274,12 +283,28 @@ fn build_cart_input(input: &Input) -> CartInput {
         })
         .unwrap_or_default();
 
+    // Get customer tags from hasTags query result
+    let customer_tags: Vec<String> = cart
+        .buyer_identity
+        .as_ref()
+        .and_then(|bi| bi.customer.as_ref())
+        .and_then(|c| c.has_tags.as_ref())
+        .map(|tags| {
+            tags.iter()
+                .filter(|t| t.has_tag)
+                .map(|t| t.tag.clone())
+                .collect()
+        })
+        .unwrap_or_default();
+
+    eprintln!("LogicFlow: Customer tags: {:?}", customer_tags);
+
     CartInput {
         total,
         subtotal,
         quantity,
         total_weight: 0.0,
-        customer_tags: vec![],
+        customer_tags,
         shipping_address: address,
         line_items: vec![],
     }

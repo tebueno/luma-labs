@@ -16,6 +16,7 @@ export const FIELD_OPTIONS = [
   { label: "Shipping Country Code", value: "shipping_address.country_code" },
   { label: "Shipping Province Code", value: "shipping_address.province_code" },
   { label: "Shipping ZIP", value: "shipping_address.zip" },
+  { label: "Customer Tags", value: "customer.tags" },
 ] as const;
 
 // ============================================================================

@@ -11,6 +11,7 @@ import type { Rule, Condition, ConditionGroup } from "./types";
 export interface MockCart {
   total: number;
   quantity: number;
+  customerTags: string[];
   shippingAddress: {
     zip: string;
     country: string;
@@ -21,12 +22,27 @@ export interface MockCart {
 export const DEFAULT_MOCK_CART: MockCart = {
   total: 0,
   quantity: 1,
+  customerTags: [],
   shippingAddress: {
     zip: "",
     country: "US",
     city: "",
   },
 };
+
+// Supported customer tags (must match GraphQL query in run.graphql)
+export const SUPPORTED_CUSTOMER_TAGS = [
+  "vip",
+  "wholesale",
+  "blacklist",
+  "blocked",
+  "fraud",
+  "test",
+  "staff",
+  "b2b",
+  "retail",
+  "preferred",
+] as const;
 
 // ============================================================================
 // Test Result Types
@@ -56,15 +72,16 @@ export interface TestResults {
 // Field Value Extraction
 // ============================================================================
 
-function getFieldValue(
-  field: string,
-  cart: MockCart
-): string | number | undefined {
+type FieldValue = string | number | string[] | undefined;
+
+function getFieldValue(field: string, cart: MockCart): FieldValue {
   switch (field) {
     case "cart.total":
       return cart.total;
     case "cart.quantity":
       return cart.quantity;
+    case "customer.tags":
+      return cart.customerTags;
     case "shipping_address.zip":
       return cart.shippingAddress.zip;
     case "shipping_address.country":
@@ -82,6 +99,8 @@ function getFieldLabel(field: string): string {
       return "Cart Total";
     case "cart.quantity":
       return "Cart Quantity";
+    case "customer.tags":
+      return "Customer Tags";
     case "shipping_address.zip":
       return "ZIP Code";
     case "shipping_address.country":
@@ -143,10 +162,44 @@ function evaluateCondition(
 
   let conditionMet = false;
 
+  // Array comparisons (e.g., customer.tags)
+  if (Array.isArray(fieldValue)) {
+    const strTarget = String(targetValue).toLowerCase();
+
+    switch (condition.operator) {
+      case "CONTAINS":
+        // Check if array contains the target value (case-insensitive)
+        conditionMet = fieldValue.some(
+          (item) => item.toLowerCase() === strTarget
+        );
+        break;
+      case "NOT_CONTAINS":
+        conditionMet = !fieldValue.some(
+          (item) => item.toLowerCase() === strTarget
+        );
+        break;
+      case "EQUALS":
+        // For arrays, EQUALS checks if the tag exists
+        conditionMet = fieldValue.some(
+          (item) => item.toLowerCase() === strTarget
+        );
+        break;
+      case "NOT_EQUALS":
+        conditionMet = !fieldValue.some(
+          (item) => item.toLowerCase() === strTarget
+        );
+        break;
+    }
+
+    return { passed: conditionMet, description };
+  }
+
   // Numeric comparisons
   if (typeof fieldValue === "number" || !isNaN(Number(fieldValue))) {
-    const numField = typeof fieldValue === "number" ? fieldValue : Number(fieldValue);
-    const numTarget = typeof targetValue === "number" ? targetValue : Number(targetValue);
+    const numField =
+      typeof fieldValue === "number" ? fieldValue : Number(fieldValue);
+    const numTarget =
+      typeof targetValue === "number" ? targetValue : Number(targetValue);
 
     switch (condition.operator) {
       case "GREATER_THAN":
