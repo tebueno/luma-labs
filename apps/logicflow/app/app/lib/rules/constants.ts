@@ -6,6 +6,25 @@ export const METAFIELD_NAMESPACE = "logicflow";
 export const METAFIELD_KEY = "rules_config";
 
 // ============================================================================
+// Field Types - categorize fields for operator filtering
+// ============================================================================
+
+export type FieldType = "numeric" | "string" | "address" | "code" | "tags";
+
+export const FIELD_TYPES: Record<string, FieldType> = {
+  "cart.total": "numeric",
+  "cart.quantity": "numeric",
+  "cart.total_weight": "numeric",
+  "shipping_address.address1": "address",
+  "shipping_address.address2": "address",
+  "shipping_address.city": "string",
+  "shipping_address.country_code": "code",
+  "shipping_address.province_code": "code",
+  "shipping_address.zip": "code",
+  "customer.tags": "tags",
+} as const;
+
+// ============================================================================
 // Field Options
 // ============================================================================
 
@@ -23,7 +42,7 @@ export const FIELD_OPTIONS = [
 ] as const;
 
 // ============================================================================
-// Operator Options
+// Operator Options - full list
 // ============================================================================
 
 export const OPERATOR_OPTIONS = [
@@ -42,6 +61,70 @@ export const OPERATOR_OPTIONS = [
 ] as const;
 
 // ============================================================================
+// Operators by Field Type - which operators are valid for each field type
+// ============================================================================
+
+export const OPERATORS_BY_FIELD_TYPE: Record<FieldType, string[]> = {
+  numeric: [
+    "GREATER_THAN",
+    "LESS_THAN",
+    "GREATER_THAN_OR_EQUAL",
+    "LESS_THAN_OR_EQUAL",
+    "EQUALS",
+    "NOT_EQUALS",
+  ],
+  string: [
+    "EQUALS",
+    "NOT_EQUALS",
+    "CONTAINS",
+    "NOT_CONTAINS",
+    "STARTS_WITH",
+    "ENDS_WITH",
+  ],
+  address: [
+    "EQUALS",
+    "NOT_EQUALS",
+    "CONTAINS",
+    "NOT_CONTAINS",
+    "STARTS_WITH",
+    "ENDS_WITH",
+    "IS_PO_BOX",
+    "IS_NOT_PO_BOX",
+  ],
+  code: ["EQUALS", "NOT_EQUALS", "CONTAINS", "STARTS_WITH"],
+  tags: ["EQUALS", "NOT_EQUALS", "CONTAINS"],
+} as const;
+
+// ============================================================================
+// Default Operators by Field Type - sensible defaults when switching fields
+// ============================================================================
+
+export const DEFAULT_OPERATOR_BY_TYPE: Record<FieldType, string> = {
+  numeric: "GREATER_THAN",
+  string: "CONTAINS",
+  address: "CONTAINS",
+  code: "EQUALS",
+  tags: "EQUALS",
+} as const;
+
+// ============================================================================
+// Value Placeholders by Field - contextual hints for users
+// ============================================================================
+
+export const VALUE_PLACEHOLDERS: Record<string, string> = {
+  "cart.total": "100.00",
+  "cart.quantity": "5",
+  "cart.total_weight": "1000",
+  "shipping_address.address1": "123 Main St",
+  "shipping_address.address2": "Apt 4B",
+  "shipping_address.city": "New York",
+  "shipping_address.country_code": "US",
+  "shipping_address.province_code": "CA",
+  "shipping_address.zip": "94105",
+  "customer.tags": "vip",
+} as const;
+
+// ============================================================================
 // Numeric Operators (for value parsing)
 // ============================================================================
 
@@ -51,6 +134,12 @@ export const NUMERIC_OPERATORS = [
   "GREATER_THAN_OR_EQUAL",
   "LESS_THAN_OR_EQUAL",
 ] as const;
+
+// ============================================================================
+// Unary Operators (no value input needed)
+// ============================================================================
+
+export const UNARY_OPERATORS = ["IS_PO_BOX", "IS_NOT_PO_BOX"] as const;
 
 // ============================================================================
 // Complexity Budget (by tier)
