@@ -11,7 +11,7 @@ import {
   Text,
   Box,
 } from "@shopify/polaris";
-import { PlusIcon, CheckCircleIcon, XCircleIcon } from "@shopify/polaris-icons";
+import { PlusIcon, CheckCircleIcon, XCircleIcon, PlayIcon } from "@shopify/polaris-icons";
 import { useCallback, useState, useEffect } from "react";
 import { authenticate } from "../shopify.server";
 
@@ -41,6 +41,7 @@ import {
   RuleModal,
   DeleteModal,
   StatusSidebar,
+  TestSimulator,
 } from "~/lib/rules/components";
 
 // ============================================================================
@@ -219,6 +220,9 @@ export default function RulesPage() {
   // Banner dismiss state
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const [showErrorBanner, setShowErrorBanner] = useState(false);
+  
+  // Test simulator modal state
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 
   // Show banners when actionData changes
   useEffect(() => {
@@ -298,6 +302,13 @@ export default function RulesPage() {
         icon: PlusIcon,
         onAction: openCreateModal,
       }}
+      secondaryActions={[
+        {
+          content: "Test Rules",
+          icon: PlayIcon,
+          onAction: () => setIsTestModalOpen(true),
+        },
+      ]}
     >
       <BlockStack gap="500">
         {/* Success Banner - with animation */}
@@ -397,6 +408,13 @@ export default function RulesPage() {
           open={deleteConfirmId !== null}
           onConfirm={handleDeleteRule}
           onClose={closeDeleteConfirm}
+        />
+
+        {/* Test Simulator Modal */}
+        <TestSimulator
+          rules={rules}
+          open={isTestModalOpen}
+          onClose={() => setIsTestModalOpen(false)}
         />
       </BlockStack>
     </Page>

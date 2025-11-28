@@ -17,7 +17,6 @@ import {
 } from "@shopify/polaris-icons";
 import type { Rule } from "../types";
 import { COMPLEXITY_BUDGET, DEFAULT_TIER } from "../constants";
-import { TestSimulator } from "./TestSimulator";
 
 // Current budget based on tier (will be dynamic in Phase 4)
 const CURRENT_BUDGET = COMPLEXITY_BUDGET[DEFAULT_TIER];
@@ -260,9 +259,6 @@ export function StatusSidebar({ rules, totalComplexity }: StatusSidebarProps) {
           </InlineStack>
         </BlockStack>
       </Card>
-
-      {/* Test Simulator */}
-      <TestSimulator rules={rules} />
 
       {/* Quick Guide Card */}
       <Card>

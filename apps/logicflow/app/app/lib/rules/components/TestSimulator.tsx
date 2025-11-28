@@ -1,12 +1,11 @@
 import { useState, useCallback, useMemo } from "react";
 import {
-  Card,
+  Modal,
   BlockStack,
   InlineStack,
   Text,
   TextField,
   Button,
-  Collapsible,
   Icon,
   Badge,
   Box,
@@ -14,18 +13,14 @@ import {
   Tag,
   Combobox,
   Listbox,
-  ButtonGroup,
 } from "@shopify/polaris";
 import {
-  ChevronDownIcon,
-  ChevronUpIcon,
   PlayIcon,
   CartIcon,
   LocationIcon,
   PersonIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ClockIcon,
 } from "@shopify/polaris-icons";
 import type { Rule } from "../types";
 import {
@@ -107,20 +102,17 @@ const TEST_PRESETS: TestPreset[] = [
 
 interface TestSimulatorProps {
   rules: Rule[];
+  open: boolean;
+  onClose: () => void;
 }
 
-export function TestSimulator({ rules }: TestSimulatorProps) {
-  const [isOpen, setIsOpen] = useState(true); // Start expanded by default
+export function TestSimulator({ rules, open, onClose }: TestSimulatorProps) {
   const [mockCart, setMockCart] = useState<MockCart>(DEFAULT_MOCK_CART);
   const [results, setResults] = useState<TestResults | null>(null);
   const [tagInputValue, setTagInputValue] = useState("");
   const [activePreset, setActivePreset] = useState<string | null>(null);
 
   const enabledRulesCount = rules.filter((r) => r.enabled).length;
-
-  const handleToggle = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
 
   const applyPreset = useCallback((preset: TestPreset) => {
     setMockCart(preset.cart);
@@ -209,103 +201,74 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
   }, [tagInputValue, mockCart.customerTags]);
 
   return (
-    <Card>
-      <BlockStack gap="400">
-        {/* Header - clickable to expand/collapse */}
-        <div
-          onClick={handleToggle}
-          style={{ cursor: "pointer" }}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && handleToggle()}
-        >
-          <InlineStack align="space-between" blockAlign="center">
-            <InlineStack gap="300" blockAlign="center">
-              <Box
-                padding="200"
-                background="bg-fill-info"
-                borderRadius="200"
-              >
-                <Icon source={PlayIcon} tone="info" />
-              </Box>
-              <BlockStack gap="050">
-                <Text as="h2" variant="headingMd">
-                  Test Simulator
-                </Text>
-                <Text as="span" variant="bodySm" tone="subdued">
-                  Verify your rules before going live
-                </Text>
-              </BlockStack>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Test Simulator"
+      primaryAction={{
+        content: `Run Test (${enabledRulesCount} rule${enabledRulesCount !== 1 ? "s" : ""})`,
+        onAction: handleRunTest,
+        icon: PlayIcon,
+        disabled: enabledRulesCount === 0,
+      }}
+      secondaryActions={[{ content: "Close", onAction: onClose }]}
+      size="large"
+    >
+      <Modal.Section>
+        <BlockStack gap="400">
+          {/* Quick Test Presets */}
+          <BlockStack gap="200">
+            <Text as="h3" variant="headingSm">
+              Quick Test Scenarios
+            </Text>
+            <InlineStack gap="200" wrap>
+              {TEST_PRESETS.map((preset) => (
+                <Button
+                  key={preset.id}
+                  icon={preset.icon}
+                  onClick={() => applyPreset(preset)}
+                  pressed={activePreset === preset.id}
+                  size="slim"
+                >
+                  {preset.name}
+                </Button>
+              ))}
             </InlineStack>
-            <InlineStack gap="200" blockAlign="center">
-              {enabledRulesCount === 0 && (
-                <Badge tone="attention">No active rules</Badge>
-              )}
-              <Icon source={isOpen ? ChevronUpIcon : ChevronDownIcon} />
-            </InlineStack>
-          </InlineStack>
-        </div>
-
-        <Collapsible open={isOpen} id="test-simulator">
-          <BlockStack gap="400">
-            <Divider />
-
-            {/* Quick Test Presets */}
-            <BlockStack gap="200">
-              <Text as="h3" variant="headingSm">
-                Quick Test Scenarios
+            {activePreset && (
+              <Text as="span" variant="bodySm" tone="subdued">
+                {TEST_PRESETS.find((p) => p.id === activePreset)?.description}
               </Text>
-              <InlineStack gap="200" wrap>
-                {TEST_PRESETS.map((preset) => (
-                  <Button
-                    key={preset.id}
-                    icon={preset.icon}
-                    onClick={() => applyPreset(preset)}
-                    pressed={activePreset === preset.id}
-                    size="slim"
-                  >
-                    {preset.name}
-                  </Button>
-                ))}
-              </InlineStack>
-              {activePreset && (
-                <Text as="span" variant="bodySm" tone="subdued">
-                  {TEST_PRESETS.find((p) => p.id === activePreset)?.description}
-                </Text>
-              )}
-            </BlockStack>
+            )}
+          </BlockStack>
 
-            <Divider />
+          <Divider />
 
-            {/* Cart Inputs */}
+          {/* Cart & Customer Details - side by side layout */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+            {/* Left Column: Cart Details */}
             <BlockStack gap="300">
               <Text as="h3" variant="headingSm">
                 Cart Details
               </Text>
 
-              <InlineStack gap="300" wrap={false}>
-                <div style={{ flex: 1 }}>
-                  <TextField
-                    label="Cart Total"
-                    type="number"
-                    value={String(mockCart.total)}
-                    onChange={(v) => updateCart("total", v)}
-                    autoComplete="off"
-                    min={0}
-                    prefix="$"
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <TextField
-                    label="Item Count"
-                    type="number"
-                    value={String(mockCart.quantity)}
-                    onChange={(v) => updateCart("quantity", v)}
-                    autoComplete="off"
-                    min={0}
-                  />
-                </div>
-              </InlineStack>
+              <TextField
+                label="Cart Total"
+                type="number"
+                value={String(mockCart.total)}
+                onChange={(v) => updateCart("total", v)}
+                autoComplete="off"
+                min={0}
+                prefix="$"
+              />
+
+              <TextField
+                label="Item Count"
+                type="number"
+                value={String(mockCart.quantity)}
+                onChange={(v) => updateCart("quantity", v)}
+                autoComplete="off"
+                min={0}
+              />
 
               <Text as="h3" variant="headingSm">
                 Customer Tags
@@ -337,7 +300,7 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
                           addTag(tagInputValue);
                         }
                       }}
-                      placeholder="Type to search or add custom tag..."
+                      placeholder="Type to add tag..."
                       autoComplete="off"
                     />
                   }
@@ -371,7 +334,10 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
                   )}
                 </Combobox>
               </BlockStack>
+            </BlockStack>
 
+            {/* Right Column: Shipping Address */}
+            <BlockStack gap="300">
               <Text as="h3" variant="headingSm">
                 Shipping Address
               </Text>
@@ -392,171 +358,151 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
                 placeholder="e.g., Apt 4B"
               />
 
+              <TextField
+                label="City"
+                value={mockCart.shippingAddress.city}
+                onChange={(v) => updateCart("city", v)}
+                autoComplete="off"
+                placeholder="e.g., New York"
+              />
+
               <InlineStack gap="300" wrap={false}>
-                <div style={{ flex: 1 }}>
-                  <TextField
-                    label="City"
-                    value={mockCart.shippingAddress.city}
-                    onChange={(v) => updateCart("city", v)}
-                    autoComplete="off"
-                    placeholder="e.g., Petaluma"
-                  />
-                </div>
                 <div style={{ flex: 1 }}>
                   <TextField
                     label="ZIP Code"
                     value={mockCart.shippingAddress.zip}
                     onChange={(v) => updateCart("zip", v)}
                     autoComplete="off"
-                    placeholder="e.g., 94954"
+                    placeholder="e.g., 10001"
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <TextField
+                    label="Country"
+                    value={mockCart.shippingAddress.country}
+                    onChange={(v) => updateCart("country", v)}
+                    autoComplete="off"
+                    placeholder="e.g., US"
                   />
                 </div>
               </InlineStack>
+            </BlockStack>
+          </div>
+        </BlockStack>
+      </Modal.Section>
 
-              <TextField
-                label="Country"
-                value={mockCart.shippingAddress.country}
-                onChange={(v) => updateCart("country", v)}
-                autoComplete="off"
-                placeholder="e.g., US"
-              />
+      {/* Results Section */}
+      {results && (
+        <Modal.Section>
+          <BlockStack gap="400">
+            {/* Results Header */}
+            <Box
+              padding="400"
+              background={
+                results.rulesBlocked > 0
+                  ? "bg-surface-critical"
+                  : "bg-surface-success"
+              }
+              borderRadius="200"
+            >
+              <InlineStack gap="300" blockAlign="center">
+                <Icon
+                  source={
+                    results.rulesBlocked > 0 ? XCircleIcon : CheckCircleIcon
+                  }
+                  tone={results.rulesBlocked > 0 ? "critical" : "success"}
+                />
+                <BlockStack gap="050">
+                  <Text as="span" variant="headingSm">
+                    {results.rulesBlocked > 0
+                      ? "Checkout Would Be Blocked"
+                      : "Checkout Would Pass"}
+                  </Text>
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    {results.rulesBlocked} blocked, {results.rulesPassed} passed
+                    {(results as any).executionTime && (
+                      <> • Evaluated in {(results as any).executionTime}ms</>
+                    )}
+                  </Text>
+                </BlockStack>
+              </InlineStack>
+            </Box>
+
+            {/* Individual Rule Results */}
+            <BlockStack gap="200">
+              <Text as="h3" variant="headingSm" tone="subdued">
+                Rule-by-Rule Results
+              </Text>
+              {results.results.map((result) => (
+                <Box
+                  key={result.ruleId}
+                  padding="300"
+                  background="bg-surface-secondary"
+                  borderRadius="200"
+                  borderColor={result.blocked ? "border-critical" : "border-success"}
+                  borderWidth="025"
+                >
+                  <BlockStack gap="200">
+                    <InlineStack align="space-between" blockAlign="center">
+                      <InlineStack gap="200" blockAlign="center">
+                        <Icon
+                          source={result.blocked ? XCircleIcon : CheckCircleIcon}
+                          tone={result.blocked ? "critical" : "success"}
+                        />
+                        <Text as="span" variant="bodyMd" fontWeight="semibold">
+                          {result.ruleName}
+                        </Text>
+                      </InlineStack>
+                      <Badge tone={result.blocked ? "critical" : "success"}>
+                        {result.blocked ? "Blocked" : "Passed"}
+                      </Badge>
+                    </InlineStack>
+
+                    {/* Show triggered conditions for blocked rules */}
+                    {result.blocked && result.conditionResults.filter((c) => c.passed).length > 0 && (
+                      <Box paddingInlineStart="400">
+                        <BlockStack gap="100">
+                          <Text as="span" variant="bodySm" tone="subdued">
+                            Triggered conditions:
+                          </Text>
+                          {result.conditionResults
+                            .filter((c) => c.passed)
+                            .map((c, i) => (
+                              <InlineStack key={i} gap="100" blockAlign="center">
+                                <Icon source={XCircleIcon} tone="critical" />
+                                <Text as="span" variant="bodySm">
+                                  {c.description}
+                                </Text>
+                              </InlineStack>
+                            ))}
+                        </BlockStack>
+                      </Box>
+                    )}
+
+                    {/* Show passed conditions for passed rules */}
+                    {!result.blocked && (
+                      <Box paddingInlineStart="400">
+                        <Text as="span" variant="bodySm" tone="subdued">
+                          No conditions matched - checkout allowed
+                        </Text>
+                      </Box>
+                    )}
+                  </BlockStack>
+                </Box>
+              ))}
             </BlockStack>
 
-            {/* Run Button */}
-            <Button
-              onClick={handleRunTest}
-              icon={PlayIcon}
-              disabled={enabledRulesCount === 0}
-              variant="primary"
-              fullWidth
-              size="large"
-            >
-              Run Test Against {enabledRulesCount} Rule
-              {enabledRulesCount !== 1 ? "s" : ""}
-            </Button>
-
-            {/* Results */}
-            {results && (
-              <BlockStack gap="400">
-                <Divider />
-
-                {/* Results Header */}
-                <Box
-                  padding="400"
-                  background={
-                    results.rulesBlocked > 0
-                      ? "bg-surface-critical"
-                      : "bg-surface-success"
-                  }
-                  borderRadius="200"
-                >
-                  <InlineStack gap="300" blockAlign="center">
-                    <Icon
-                      source={
-                        results.rulesBlocked > 0 ? XCircleIcon : CheckCircleIcon
-                      }
-                      tone={results.rulesBlocked > 0 ? "critical" : "success"}
-                    />
-                    <BlockStack gap="050">
-                      <Text as="span" variant="headingSm">
-                        {results.rulesBlocked > 0
-                          ? "Checkout Would Be Blocked"
-                          : "Checkout Would Pass"}
-                      </Text>
-                      <Text as="span" variant="bodySm" tone="subdued">
-                        {results.rulesBlocked} blocked, {results.rulesPassed}{" "}
-                        passed
-                        {(results as any).executionTime && (
-                          <> • Evaluated in {(results as any).executionTime}ms</>
-                        )}
-                      </Text>
-                    </BlockStack>
-                  </InlineStack>
-                </Box>
-
-                {/* Individual Rule Results */}
-                <BlockStack gap="200">
-                  <Text as="h3" variant="headingSm" tone="subdued">
-                    Rule-by-Rule Results
-                  </Text>
-                  {results.results.map((result) => (
-                    <Box
-                      key={result.ruleId}
-                      padding="300"
-                      background="bg-surface-secondary"
-                      borderRadius="200"
-                      borderColor={result.blocked ? "border-critical" : "border-success"}
-                      borderWidth="025"
-                    >
-                      <BlockStack gap="200">
-                        <InlineStack align="space-between" blockAlign="center">
-                          <InlineStack gap="200" blockAlign="center">
-                            <Icon
-                              source={result.blocked ? XCircleIcon : CheckCircleIcon}
-                              tone={result.blocked ? "critical" : "success"}
-                            />
-                            <Text as="span" variant="bodyMd" fontWeight="semibold">
-                              {result.ruleName}
-                            </Text>
-                          </InlineStack>
-                          <Badge tone={result.blocked ? "critical" : "success"}>
-                            {result.blocked ? "Blocked" : "Passed"}
-                          </Badge>
-                        </InlineStack>
-
-                        {/* Show triggered conditions for blocked rules */}
-                        {result.blocked && result.conditionResults.filter((c) => c.passed).length > 0 && (
-                          <Box paddingInlineStart="400">
-                            <BlockStack gap="100">
-                              <Text as="span" variant="bodySm" tone="subdued">
-                                Triggered conditions:
-                              </Text>
-                              {result.conditionResults
-                                .filter((c) => c.passed)
-                                .map((c, i) => (
-                                  <InlineStack key={i} gap="100" blockAlign="center">
-                                    <Box
-                                      background="bg-fill-critical"
-                                      padding="050"
-                                      borderRadius="100"
-                                    >
-                                      <Icon source={XCircleIcon} tone="critical" />
-                                    </Box>
-                                    <Text as="span" variant="bodySm">
-                                      {c.description}
-                                    </Text>
-                                  </InlineStack>
-                                ))}
-                            </BlockStack>
-                          </Box>
-                        )}
-
-                        {/* Show passed conditions for passed rules */}
-                        {!result.blocked && (
-                          <Box paddingInlineStart="400">
-                            <Text as="span" variant="bodySm" tone="subdued">
-                              No conditions matched - checkout allowed
-                            </Text>
-                          </Box>
-                        )}
-                      </BlockStack>
-                    </Box>
-                  ))}
-                </BlockStack>
-
-                {results.rulesEvaluated === 0 && (
-                  <Box padding="400" background="bg-surface-secondary" borderRadius="200">
-                    <Text as="p" variant="bodySm" tone="subdued" alignment="center">
-                      No enabled rules to test. Enable at least one rule to run tests.
-                    </Text>
-                  </Box>
-                )}
-              </BlockStack>
+            {results.rulesEvaluated === 0 && (
+              <Box padding="400" background="bg-surface-secondary" borderRadius="200">
+                <Text as="p" variant="bodySm" tone="subdued" alignment="center">
+                  No enabled rules to test. Enable at least one rule to run tests.
+                </Text>
+              </Box>
             )}
           </BlockStack>
-        </Collapsible>
-      </BlockStack>
-    </Card>
+        </Modal.Section>
+      )}
+    </Modal>
   );
 }
 
