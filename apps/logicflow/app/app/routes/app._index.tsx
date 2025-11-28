@@ -1,8 +1,8 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
-import { Page, Layout, BlockStack, Banner } from "@shopify/polaris";
-import { PlusIcon } from "@shopify/polaris-icons";
+import { Page, Layout, BlockStack, Banner, Icon, InlineStack, Text, Box } from "@shopify/polaris";
+import { PlusIcon, CheckCircleIcon, XCircleIcon } from "@shopify/polaris-icons";
 import { useCallback, useState, useEffect } from "react";
 import { authenticate } from "../shopify.server";
 
@@ -291,25 +291,55 @@ export default function RulesPage() {
       }}
     >
       <BlockStack gap="500">
-        {/* Success Banner */}
+        {/* Success Banner - with animation */}
         {showSuccessBanner && actionData?.success && "action" in actionData && (
-          <Banner tone="success" onDismiss={() => setShowSuccessBanner(false)}>
-            {actionData.action === "create" && "Rule created successfully!"}
-            {actionData.action === "update" && "Rule updated successfully!"}
-            {actionData.action === "delete" && "Rule deleted successfully!"}
-            {actionData.action === "toggle" && "Rule status updated!"}
-            {actionData.action === "clear" && "All rules cleared!"}
-          </Banner>
+          <div className="logicflow-slide-in">
+            <Banner
+              tone="success"
+              onDismiss={() => setShowSuccessBanner(false)}
+              icon={CheckCircleIcon}
+            >
+              <InlineStack gap="200" blockAlign="center">
+                <Text as="span" variant="bodyMd" fontWeight="semibold">
+                  {actionData.action === "create" && "Rule created successfully!"}
+                  {actionData.action === "update" && "Rule updated successfully!"}
+                  {actionData.action === "delete" && "Rule deleted successfully!"}
+                  {actionData.action === "toggle" && "Rule status updated!"}
+                  {actionData.action === "clear" && "All rules cleared!"}
+                </Text>
+                <Text as="span" variant="bodySm" tone="subdued">
+                  {actionData.action === "create" && "Your rule is now active and will be enforced at checkout."}
+                  {actionData.action === "update" && "Changes have been saved and are now live."}
+                  {actionData.action === "delete" && "The rule has been permanently removed."}
+                  {actionData.action === "toggle" && "The rule status has been updated."}
+                  {actionData.action === "clear" && "All rules have been removed from your store."}
+                </Text>
+              </InlineStack>
+            </Banner>
+          </div>
         )}
 
-        {/* Error Banner */}
+        {/* Error Banner - with animation */}
         {showErrorBanner &&
           actionData &&
           "error" in actionData &&
           actionData.error && (
-            <Banner tone="critical" onDismiss={() => setShowErrorBanner(false)}>
-              Error: {actionData.error}
-            </Banner>
+            <div className="logicflow-slide-in">
+              <Banner
+                tone="critical"
+                onDismiss={() => setShowErrorBanner(false)}
+                icon={XCircleIcon}
+              >
+                <InlineStack gap="200" blockAlign="center">
+                  <Text as="span" variant="bodyMd" fontWeight="semibold">
+                    Something went wrong
+                  </Text>
+                  <Text as="span" variant="bodySm">
+                    {actionData.error}
+                  </Text>
+                </InlineStack>
+              </Banner>
+            </div>
           )}
 
         <Layout>
