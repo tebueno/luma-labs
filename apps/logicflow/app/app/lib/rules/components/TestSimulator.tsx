@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Card,
   BlockStack,
@@ -12,14 +12,13 @@ import {
   Box,
   Divider,
   Tag,
-  Popover,
-  ActionList,
+  Combobox,
+  Listbox,
 } from "@shopify/polaris";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   PlayIcon,
-  PlusIcon,
 } from "@shopify/polaris-icons";
 import type { Rule } from "../types";
 import {
@@ -38,7 +37,7 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mockCart, setMockCart] = useState<MockCart>(DEFAULT_MOCK_CART);
   const [results, setResults] = useState<TestResults | null>(null);
-  const [tagPopoverActive, setTagPopoverActive] = useState(false);
+  const [tagInputValue, setTagInputValue] = useState("");
 
   const enabledRulesCount = rules.filter((r) => r.enabled).length;
 
@@ -78,11 +77,13 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
   );
 
   const addTag = useCallback((tag: string) => {
+    const trimmedTag = tag.trim().toLowerCase();
+    if (!trimmedTag) return;
     setMockCart((prev) => {
-      if (prev.customerTags.includes(tag)) return prev;
-      return { ...prev, customerTags: [...prev.customerTags, tag] };
+      if (prev.customerTags.includes(trimmedTag)) return prev;
+      return { ...prev, customerTags: [...prev.customerTags, trimmedTag] };
     });
-    setTagPopoverActive(false);
+    setTagInputValue("");
     setResults(null);
   }, []);
 
@@ -94,9 +95,15 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
     setResults(null);
   }, []);
 
-  const availableTags = SUPPORTED_CUSTOMER_TAGS.filter(
-    (tag) => !mockCart.customerTags.includes(tag)
-  );
+  // Filter suggestions based on input, excluding already added tags
+  const filteredTags = useMemo(() => {
+    const notAdded = SUPPORTED_CUSTOMER_TAGS.filter(
+      (tag) => !mockCart.customerTags.includes(tag)
+    );
+    if (!tagInputValue) return notAdded;
+    const lowerInput = tagInputValue.toLowerCase();
+    return notAdded.filter((tag) => tag.includes(lowerInput));
+  }, [tagInputValue, mockCart.customerTags]);
 
   return (
     <Card>
@@ -159,41 +166,66 @@ export function TestSimulator({ rules }: TestSimulatorProps) {
                 Customer Tags
               </Text>
 
-              <InlineStack gap="200" wrap>
-                {mockCart.customerTags.map((tag) => (
-                  <Tag key={tag} onRemove={() => removeTag(tag)}>
-                    {tag}
-                  </Tag>
-                ))}
-                {availableTags.length > 0 && (
-                  <Popover
-                    active={tagPopoverActive}
-                    activator={
-                      <Button
-                        size="micro"
-                        icon={PlusIcon}
-                        onClick={() => setTagPopoverActive(true)}
-                      >
-                        Add tag
-                      </Button>
-                    }
-                    onClose={() => setTagPopoverActive(false)}
-                  >
-                    <ActionList
-                      items={availableTags.map((tag) => ({
-                        content: tag,
-                        onAction: () => addTag(tag),
-                      }))}
-                    />
-                  </Popover>
-                )}
-                {mockCart.customerTags.length === 0 &&
-                  availableTags.length === SUPPORTED_CUSTOMER_TAGS.length && (
+              <BlockStack gap="200">
+                <InlineStack gap="200" wrap>
+                  {mockCart.customerTags.map((tag) => (
+                    <Tag key={tag} onRemove={() => removeTag(tag)}>
+                      {tag}
+                    </Tag>
+                  ))}
+                  {mockCart.customerTags.length === 0 && (
                     <Text as="span" variant="bodySm" tone="subdued">
                       No tags (guest checkout)
                     </Text>
                   )}
-              </InlineStack>
+                </InlineStack>
+
+                <Combobox
+                  activator={
+                    <Combobox.TextField
+                      label="Add tag"
+                      labelHidden
+                      value={tagInputValue}
+                      onChange={setTagInputValue}
+                      onBlur={() => {
+                        if (tagInputValue.trim()) {
+                          addTag(tagInputValue);
+                        }
+                      }}
+                      placeholder="Type to search or add custom tag..."
+                      autoComplete="off"
+                    />
+                  }
+                >
+                  {filteredTags.length > 0 && (
+                    <Listbox onSelect={addTag}>
+                      {filteredTags.slice(0, 10).map((tag) => (
+                        <Listbox.Option key={tag} value={tag}>
+                          {tag}
+                        </Listbox.Option>
+                      ))}
+                      {tagInputValue &&
+                        !SUPPORTED_CUSTOMER_TAGS.includes(
+                          tagInputValue.toLowerCase() as (typeof SUPPORTED_CUSTOMER_TAGS)[number]
+                        ) &&
+                        !mockCart.customerTags.includes(
+                          tagInputValue.toLowerCase()
+                        ) && (
+                          <Listbox.Option value={tagInputValue.toLowerCase()}>
+                            Add custom: "{tagInputValue}"
+                          </Listbox.Option>
+                        )}
+                    </Listbox>
+                  )}
+                  {filteredTags.length === 0 && tagInputValue && (
+                    <Listbox onSelect={addTag}>
+                      <Listbox.Option value={tagInputValue.toLowerCase()}>
+                        Add custom: "{tagInputValue}"
+                      </Listbox.Option>
+                    </Listbox>
+                  )}
+                </Combobox>
+              </BlockStack>
 
               <Text as="h3" variant="headingSm" tone="subdued">
                 Shipping Address

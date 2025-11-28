@@ -14,7 +14,13 @@ query Input {
     buyerIdentity {
       customer {
         id
-        hasTags(tags: ["vip", "wholesale", "blacklist", "blocked", "fraud", "test", "staff", "b2b", "retail", "preferred"]) {
+        hasTags(tags: [
+          "vip", "wholesale", "retail", "b2b", "preferred", "premium", "gold", "silver", "bronze",
+          "blacklist", "blocked", "fraud", "suspicious", "review",
+          "test", "staff", "employee", "internal",
+          "newsletter", "beta", "loyalty", "referral",
+          "corporate", "enterprise", "partner", "reseller", "distributor"
+        ]) {
           hasTag
           tag
         }

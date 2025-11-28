@@ -31,17 +31,40 @@ export const DEFAULT_MOCK_CART: MockCart = {
 };
 
 // Supported customer tags (must match GraphQL query in run.graphql)
+// These are common tags used by Shopify merchants for checkout validation
 export const SUPPORTED_CUSTOMER_TAGS = [
+  // Customer tier / type
   "vip",
   "wholesale",
+  "retail",
+  "b2b",
+  "preferred",
+  "premium",
+  "gold",
+  "silver",
+  "bronze",
+  // Risk / security
   "blacklist",
   "blocked",
   "fraud",
+  "suspicious",
+  "review",
+  // Internal / testing
   "test",
   "staff",
-  "b2b",
-  "retail",
-  "preferred",
+  "employee",
+  "internal",
+  // Marketing / campaigns
+  "newsletter",
+  "beta",
+  "loyalty",
+  "referral",
+  // Business type
+  "corporate",
+  "enterprise",
+  "partner",
+  "reseller",
+  "distributor",
 ] as const;
 
 // ============================================================================
