@@ -8,10 +8,20 @@ import {
   Badge,
   Button,
   Tooltip,
-  EmptyState,
   Box,
+  Icon,
 } from "@shopify/polaris";
-import { DeleteIcon, EditIcon, ViewIcon, HideIcon } from "@shopify/polaris-icons";
+import {
+  DeleteIcon,
+  EditIcon,
+  ViewIcon,
+  HideIcon,
+  CartIcon,
+  LocationIcon,
+  PersonIcon,
+  CheckIcon,
+  XIcon,
+} from "@shopify/polaris-icons";
 import type { Rule } from "../types";
 import { getRuleSummary } from "../utils";
 
@@ -24,6 +34,166 @@ interface RuleListProps {
   onClearAll: () => void;
 }
 
+// ============================================================================
+// Custom Empty State Illustration
+// ============================================================================
+
+function LogicFlowIllustration() {
+  return (
+    <svg
+      width="200"
+      height="160"
+      viewBox="0 0 200 160"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ margin: "0 auto", display: "block" }}
+    >
+      {/* Background gradient circle */}
+      <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#e3f1df" />
+          <stop offset="100%" stopColor="#f1f8ee" />
+        </linearGradient>
+        <linearGradient id="blockGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fce4e4" />
+          <stop offset="100%" stopColor="#fff5f5" />
+        </linearGradient>
+      </defs>
+      
+      {/* Condition boxes */}
+      <rect x="10" y="25" width="70" height="35" rx="6" fill="#f4f6f8" stroke="#8c9196" strokeWidth="1.5" />
+      <text x="45" y="47" textAnchor="middle" fontSize="11" fill="#202223" fontWeight="500">Cart &gt; $100</text>
+      
+      <rect x="10" y="75" width="70" height="35" rx="6" fill="#f4f6f8" stroke="#8c9196" strokeWidth="1.5" />
+      <text x="45" y="97" textAnchor="middle" fontSize="11" fill="#202223" fontWeight="500">PO Box</text>
+      
+      {/* AND/OR connector */}
+      <rect x="95" y="55" width="30" height="24" rx="4" fill="#5c6ac4" />
+      <text x="110" y="71" textAnchor="middle" fontSize="10" fill="white" fontWeight="600">OR</text>
+      
+      {/* Connecting lines */}
+      <path d="M80 42 L95 67" stroke="#8c9196" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M80 92 L95 67" stroke="#8c9196" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M125 67 L145 67" stroke="#8c9196" strokeWidth="1.5" strokeLinecap="round" />
+      
+      {/* Result: Block checkout */}
+      <rect x="145" y="47" width="45" height="40" rx="6" fill="url(#blockGradient)" stroke="#d72c0d" strokeWidth="1.5" />
+      <circle cx="167" cy="62" r="8" fill="#d72c0d" />
+      <path d="M163 62 L171 62" stroke="white" strokeWidth="2" strokeLinecap="round" />
+      <text x="167" y="80" textAnchor="middle" fontSize="8" fill="#d72c0d" fontWeight="500">BLOCK</text>
+      
+      {/* Decorative elements */}
+      <circle cx="25" cy="130" r="4" fill="#5c6ac4" opacity="0.3" />
+      <circle cx="45" cy="140" r="3" fill="#5c6ac4" opacity="0.2" />
+      <circle cx="175" cy="120" r="5" fill="#008060" opacity="0.3" />
+      <circle cx="155" cy="135" r="3" fill="#008060" opacity="0.2" />
+      
+      {/* Label */}
+      <text x="100" y="150" textAnchor="middle" fontSize="10" fill="#6d7175">Visual checkout validation</text>
+    </svg>
+  );
+}
+
+// ============================================================================
+// Use Case Templates
+// ============================================================================
+
+interface UseCaseProps {
+  icon: typeof CartIcon;
+  title: string;
+  description: string;
+}
+
+function UseCaseCard({ icon, title, description }: UseCaseProps) {
+  return (
+    <Box
+      padding="300"
+      background="bg-surface-secondary"
+      borderRadius="200"
+    >
+      <InlineStack gap="200" blockAlign="start" wrap={false}>
+        <Box>
+          <Icon source={icon} tone="base" />
+        </Box>
+        <BlockStack gap="050">
+          <Text as="span" variant="bodySm" fontWeight="semibold">
+            {title}
+          </Text>
+          <Text as="span" variant="bodySm" tone="subdued">
+            {description}
+          </Text>
+        </BlockStack>
+      </InlineStack>
+    </Box>
+  );
+}
+
+// ============================================================================
+// Empty State Component
+// ============================================================================
+
+function RuleListEmptyState({ onAddRule }: { onAddRule: () => void }) {
+  return (
+    <Card>
+      <Box padding="600">
+        <BlockStack gap="500" align="center">
+          {/* Custom Illustration */}
+          <LogicFlowIllustration />
+
+          {/* Headline */}
+          <BlockStack gap="200" align="center">
+            <Text as="h2" variant="headingLg" alignment="center">
+              Protect Your Checkout in Minutes
+            </Text>
+            <Text as="p" variant="bodyMd" tone="subdued" alignment="center">
+              Block fraudulent orders, restrict shipping zones, enforce business
+              rules — all without writing code. Your rules run at checkout in
+              under 5ms.
+            </Text>
+          </BlockStack>
+
+          {/* CTA Button */}
+          <Button variant="primary" size="large" onClick={onAddRule}>
+            Create Your First Rule
+          </Button>
+
+          {/* Use Cases */}
+          <Box paddingBlockStart="400" width="100%">
+            <BlockStack gap="300">
+              <Text as="h3" variant="headingSm" tone="subdued">
+                Popular use cases
+              </Text>
+              <InlineStack gap="300" wrap>
+                <Box minWidth="200px">
+                  <UseCaseCard
+                    icon={LocationIcon}
+                    title="Block PO Boxes"
+                    description="Prevent shipping to PO Box addresses"
+                  />
+                </Box>
+                <Box minWidth="200px">
+                  <UseCaseCard
+                    icon={CartIcon}
+                    title="Order Limits"
+                    description="Set min/max cart totals or quantities"
+                  />
+                </Box>
+                <Box minWidth="200px">
+                  <UseCaseCard
+                    icon={PersonIcon}
+                    title="Customer Restrictions"
+                    description="Block or allow by customer tag"
+                  />
+                </Box>
+              </InlineStack>
+            </BlockStack>
+          </Box>
+        </BlockStack>
+      </Box>
+    </Card>
+  );
+}
+
 export function RuleList({
   rules,
   onEdit,
@@ -33,23 +203,7 @@ export function RuleList({
   onClearAll,
 }: RuleListProps) {
   if (rules.length === 0) {
-    return (
-      <Card>
-        <EmptyState
-          heading="Create your first validation rule"
-          action={{
-            content: "Add Rule",
-            onAction: onAddRule,
-          }}
-          image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-        >
-          <p>
-            Validation rules let you control what can and cannot be checked out.
-            Block orders by cart total, shipping location, and more.
-          </p>
-        </EmptyState>
-      </Card>
-    );
+    return <RuleListEmptyState onAddRule={onAddRule} />;
   }
 
   return (
