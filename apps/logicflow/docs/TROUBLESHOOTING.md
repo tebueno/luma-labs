@@ -294,3 +294,101 @@ query {
 2. Look for "Checkout rules" or "Validation"
 3. Ensure LogicFlow Validator is enabled
 
+---
+
+## Customer Tags Limitation
+
+### The Problem
+
+Shopify Functions use **static GraphQL queries** compiled into the WASM binary at build time. For customer tags, this means:
+
+```graphql
+# This query is FROZEN when you deploy
+hasTags(tags: ["vip", "wholesale", "blacklist", ...])
+```
+
+You **cannot** dynamically query "whatever tags the merchant configured." The tags must be specified in code before deployment.
+
+### Current Implementation (Option D)
+
+We ship with 30 pre-defined common tags:
+
+**Customer tier:** `vip`, `wholesale`, `retail`, `b2b`, `preferred`, `premium`, `gold`, `silver`, `bronze`
+
+**Risk/security:** `blacklist`, `blocked`, `fraud`, `suspicious`, `review`
+
+**Internal/testing:** `test`, `staff`, `employee`, `internal`
+
+**Marketing:** `newsletter`, `beta`, `loyalty`, `referral`
+
+**Business type:** `corporate`, `enterprise`, `partner`, `reseller`, `distributor`
+
+If a merchant uses a tag not in this list:
+- The UI shows a warning: "Tag not in supported list"
+- The rule will NOT work at checkout
+- Contact support to add the tag and redeploy
+
+### Adding Custom Tags (Developer)
+
+1. Add tag to `apps/logicflow/app/extensions/logicflow-validator/src/run.graphql`:
+   ```graphql
+   hasTags(tags: ["vip", ..., "NEW_TAG_HERE"])
+   ```
+
+2. Add tag to `apps/logicflow/app/app/lib/rules/evaluator.ts`:
+   ```typescript
+   export const SUPPORTED_CUSTOMER_TAGS = [
+     // ...existing tags
+     "new_tag_here",
+   ] as const;
+   ```
+
+3. Deploy: `shopify app deploy`
+
+---
+
+## Alternative Approaches (Future Consideration)
+
+### Option A: Remove Customer Tags Feature
+- Remove `customer.tags` from field options
+- Focus on cart/address fields which work dynamically
+- **Pros:** No limitations to explain
+- **Cons:** Loses valuable use case
+
+### Option B: Merchant-Triggered Rebuild
+- When merchant saves a rule with new tag → show "Deploy Required" button
+- Button triggers function rebuild with their custom tags
+- **Pros:** Full flexibility
+- **Cons:** Bad UX, slow (rebuild takes ~30s), complex infrastructure
+
+### Option C: Customer Metafields Instead of Tags
+- Query a customer metafield we control:
+  ```graphql
+  customer {
+    metafield(namespace: "logicflow", key: "flags") {
+      value  # JSON: ["vip", "custom-tag", ...]
+    }
+  }
+  ```
+- Merchant syncs their tags to this metafield via Shopify Flow or API
+- **Pros:** Fully dynamic
+- **Cons:** Requires merchant to set up sync, not using native tags
+
+### Option D: Accept Limitation (Current)
+- Ship with 30 common tags
+- Document the limitation
+- Add custom tags on request
+- **Pros:** Simple, works for most cases
+- **Cons:** Not fully self-service
+
+---
+
+## Why Shopify Does This
+
+Shopify Functions run in a sandboxed WASM environment with strict performance requirements (<5ms execution). Static queries allow Shopify to:
+1. Optimize data fetching before function runs
+2. Validate queries at compile time
+3. Ensure predictable performance
+
+This is a platform limitation, not a LogicFlow limitation.
+
