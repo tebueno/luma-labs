@@ -83,6 +83,8 @@ pub enum ComparisonOperator {
     RegexMatch,
     In,
     NotIn,
+    IsPoBox,
+    IsNotPoBox,
 }
 
 // ============================================================================
