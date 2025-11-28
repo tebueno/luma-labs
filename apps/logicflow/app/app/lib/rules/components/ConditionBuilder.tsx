@@ -34,63 +34,65 @@ interface LogicalOperatorToggleProps {
 
 function LogicalOperatorToggle({ value, onChange }: LogicalOperatorToggleProps) {
   return (
-    <Box paddingBlock="100">
-      <InlineStack gap="200" blockAlign="center">
-        {/* Left connector line */}
-        <Box
-          background="bg-fill-tertiary"
-          minWidth="40px"
-          minHeight="2px"
-          borderRadius="100"
-        />
-        
-        {/* Toggle buttons */}
-        <InlineStack gap="0">
-          <button
-            type="button"
-            onClick={() => onChange("AND")}
-            style={{
-              padding: "6px 14px",
-              fontSize: "12px",
-              fontWeight: 600,
-              border: "none",
-              borderRadius: "6px 0 0 6px",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              backgroundColor: value === "AND" ? "#5c6ac4" : "#f1f2f4",
-              color: value === "AND" ? "white" : "#6d7175",
-            }}
-          >
-            AND
-          </button>
-          <button
-            type="button"
-            onClick={() => onChange("OR")}
-            style={{
-              padding: "6px 14px",
-              fontSize: "12px",
-              fontWeight: 600,
-              border: "none",
-              borderRadius: "0 6px 6px 0",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              backgroundColor: value === "OR" ? "#5c6ac4" : "#f1f2f4",
-              color: value === "OR" ? "white" : "#6d7175",
-            }}
-          >
-            OR
-          </button>
-        </InlineStack>
-        
-        {/* Right connector line */}
-        <Box
-          background="bg-fill-tertiary"
-          minWidth="40px"
-          minHeight="2px"
-          borderRadius="100"
-        />
-      </InlineStack>
-    </Box>
+    <div style={{ padding: "8px 0", display: "flex", alignItems: "center", gap: "12px" }}>
+      {/* Left connector line */}
+      <div
+        style={{
+          flex: 1,
+          height: "2px",
+          backgroundColor: "#c9cccf",
+          borderRadius: "1px",
+        }}
+      />
+      
+      {/* Toggle buttons */}
+      <div style={{ display: "flex" }}>
+        <button
+          type="button"
+          onClick={() => onChange("AND")}
+          style={{
+            padding: "6px 14px",
+            fontSize: "12px",
+            fontWeight: 600,
+            border: "none",
+            borderRadius: "6px 0 0 6px",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            backgroundColor: value === "AND" ? "#5c6ac4" : "#e4e5e7",
+            color: value === "AND" ? "white" : "#6d7175",
+          }}
+        >
+          AND
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange("OR")}
+          style={{
+            padding: "6px 14px",
+            fontSize: "12px",
+            fontWeight: 600,
+            border: "none",
+            borderRadius: "0 6px 6px 0",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            backgroundColor: value === "OR" ? "#5c6ac4" : "#e4e5e7",
+            color: value === "OR" ? "white" : "#6d7175",
+          }}
+        >
+          OR
+        </button>
+      </div>
+      
+      {/* Right connector line */}
+      <div
+        style={{
+          flex: 1,
+          height: "2px",
+          backgroundColor: "#c9cccf",
+          borderRadius: "1px",
+        }}
+      />
+    </div>
   );
 }
 
@@ -109,25 +111,30 @@ function LogicExplanation({ operator, conditionCount }: LogicExplanationProps) {
   const isAnd = operator === "AND";
   
   return (
-    <Box
-      padding="300"
-      background={isAnd ? "bg-surface-warning" : "bg-surface-info"}
-      borderRadius="200"
+    <div
+      style={{
+        padding: "12px 16px",
+        backgroundColor: isAnd ? "#fef8e8" : "#eef3f8",
+        borderRadius: "8px",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "12px",
+      }}
     >
-      <InlineStack gap="200" blockAlign="center" wrap={false}>
+      <div style={{ flexShrink: 0, paddingTop: "2px" }}>
         <Icon source={AlertCircleIcon} tone={isAnd ? "caution" : "info"} />
-        <BlockStack gap="050">
-          <Text as="span" variant="bodySm" fontWeight="semibold">
-            {isAnd ? "Strict matching (AND)" : "Flexible matching (OR)"}
-          </Text>
-          <Text as="span" variant="bodySm" tone="subdued">
-            {isAnd
-              ? `All ${conditionCount} conditions must be true to block checkout`
-              : `Any 1 of ${conditionCount} conditions will block checkout`}
-          </Text>
-        </BlockStack>
-      </InlineStack>
-    </Box>
+      </div>
+      <div>
+        <Text as="p" variant="bodySm" fontWeight="semibold">
+          {isAnd ? "Strict matching (AND)" : "Flexible matching (OR)"}
+        </Text>
+        <Text as="p" variant="bodySm" tone="subdued">
+          {isAnd
+            ? `All ${conditionCount} conditions must be true to block checkout`
+            : `Any 1 of ${conditionCount} conditions will block checkout`}
+        </Text>
+      </div>
+    </div>
   );
 }
 

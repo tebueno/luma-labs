@@ -1,7 +1,16 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useActionData, useLoaderData, useSubmit } from "@remix-run/react";
-import { Page, Layout, BlockStack, Banner, Icon, InlineStack, Text, Box } from "@shopify/polaris";
+import {
+  Page,
+  Layout,
+  BlockStack,
+  Banner,
+  Icon,
+  InlineStack,
+  Text,
+  Box,
+} from "@shopify/polaris";
 import { PlusIcon, CheckCircleIcon, XCircleIcon } from "@shopify/polaris-icons";
 import { useCallback, useState, useEffect } from "react";
 import { authenticate } from "../shopify.server";
@@ -301,18 +310,26 @@ export default function RulesPage() {
             >
               <InlineStack gap="200" blockAlign="center">
                 <Text as="span" variant="bodyMd" fontWeight="semibold">
-                  {actionData.action === "create" && "Rule created successfully!"}
-                  {actionData.action === "update" && "Rule updated successfully!"}
-                  {actionData.action === "delete" && "Rule deleted successfully!"}
+                  {actionData.action === "create" &&
+                    "Rule created successfully!"}
+                  {actionData.action === "update" &&
+                    "Rule updated successfully!"}
+                  {actionData.action === "delete" &&
+                    "Rule deleted successfully!"}
                   {actionData.action === "toggle" && "Rule status updated!"}
                   {actionData.action === "clear" && "All rules cleared!"}
                 </Text>
                 <Text as="span" variant="bodySm" tone="subdued">
-                  {actionData.action === "create" && "Your rule is now active and will be enforced at checkout."}
-                  {actionData.action === "update" && "Changes have been saved and are now live."}
-                  {actionData.action === "delete" && "The rule has been permanently removed."}
-                  {actionData.action === "toggle" && "The rule status has been updated."}
-                  {actionData.action === "clear" && "All rules have been removed from your store."}
+                  {actionData.action === "create" &&
+                    "Your rule is now active and will be enforced at checkout."}
+                  {actionData.action === "update" &&
+                    "Changes have been saved and are now live."}
+                  {actionData.action === "delete" &&
+                    "The rule has been permanently removed."}
+                  {actionData.action === "toggle" &&
+                    "The rule status has been updated."}
+                  {actionData.action === "clear" &&
+                    "All rules have been removed from your store."}
                 </Text>
               </InlineStack>
             </Banner>

@@ -347,18 +347,23 @@ function RuleListItem({ rule, onEdit, onToggle, onDelete }: RuleListItemProps) {
               </Box>
 
               {/* Error message preview */}
-              <Box
-                padding="200"
-                background="bg-surface-secondary"
-                borderRadius="100"
+              <div
+                style={{
+                  padding: "8px 12px",
+                  backgroundColor: "#f6f6f7",
+                  borderRadius: "6px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
               >
-                <InlineStack gap="100" blockAlign="center" wrap={false}>
+                <div style={{ flexShrink: 0 }}>
                   <Icon source={XIcon} tone="critical" />
-                  <Text as="span" variant="bodySm">
-                    "{error_message}"
-                  </Text>
-                </InlineStack>
-              </Box>
+                </div>
+                <Text as="span" variant="bodySm">
+                  "{error_message}"
+                </Text>
+              </div>
             </BlockStack>
 
             {/* Action buttons */}
