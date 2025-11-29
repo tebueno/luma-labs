@@ -11,7 +11,12 @@ import {
   Text,
   Box,
 } from "@shopify/polaris";
-import { PlusIcon, CheckCircleIcon, XCircleIcon, PlayIcon } from "@shopify/polaris-icons";
+import {
+  PlusIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  PlayIcon,
+} from "@shopify/polaris-icons";
 import { useCallback, useState, useEffect } from "react";
 import { authenticate } from "../shopify.server";
 
@@ -220,7 +225,7 @@ export default function RulesPage() {
   // Banner dismiss state
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const [showErrorBanner, setShowErrorBanner] = useState(false);
-  
+
   // Test simulator modal state
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 

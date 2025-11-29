@@ -20,7 +20,7 @@ The proof-of-concept is complete with core functionality working end-to-end:
 - **Metafield Sync** - Rules stored in shop metafield, read by function
 - **Field Support** - Cart total, cart quantity, shipping address (zip, country, city)
 - **Customer Tags** - 30 pre-defined tags (see Known Limitations)
-- **Test Simulator** - Mock cart testing in sidebar
+- **Test Simulator** - Mock cart testing via modal
 
 ### ⚠️ Known Limitations
 
