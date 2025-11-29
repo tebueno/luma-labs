@@ -3,7 +3,7 @@
 
 name = "LogicFlow"
 client_id = "32fce9b52a73fb9f21f305a24949a6d7"
-application_url = "https://shopify.dev/apps/default-app-home"
+application_url = "https://luma-labs-jade.vercel.app"
 embedded = true
 
 [build]
@@ -15,7 +15,8 @@ scopes = "read_products,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://shopify.dev/apps/default-app-home/api/auth"
+  "https://luma-labs-jade.vercel.app/auth/callback",
+  "https://luma-labs-jade.vercel.app/auth/shopify/callback"
 ]
 
 [webhooks]
