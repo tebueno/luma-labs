@@ -10,6 +10,7 @@
     "shopify": "shopify",
     "start": "remix-serve ./build/server/index.js",
     "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && remix vite:build",
     "typecheck": "tsc"
   },
   "dependencies": {
