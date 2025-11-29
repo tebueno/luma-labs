@@ -3,20 +3,23 @@
 
 name = "LogicFlow"
 client_id = "32fce9b52a73fb9f21f305a24949a6d7"
-application_url = "https://your-app-url.com"
+application_url = "https://shopify.dev/apps/default-app-home"
 embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
 
 [access_scopes]
 scopes = "read_products,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://your-app-url.com/auth/callback",
-  "https://your-app-url.com/auth/shopify/callback"
+  "https://shopify.dev/apps/default-app-home/api/auth"
 ]
 
 [webhooks]
-api_version = "2024-10"
+api_version = "2026-01"
 
 [pos]
 embedded = false
