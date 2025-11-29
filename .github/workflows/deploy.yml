@@ -26,8 +26,9 @@ jobs:
           cache-dependency-path: apps/logicflow/app/package-lock.json
       
       - name: Setup Rust
-        uses: dtolnay/rust-action@stable
+        uses: rust-lang/setup-rust-action@v1
         with:
+          rust-version: stable
           targets: wasm32-wasip1
       
       - name: Install dependencies
