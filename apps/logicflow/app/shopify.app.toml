@@ -2,7 +2,7 @@
 # Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
 
 name = "LogicFlow"
-client_id = "YOUR_CLIENT_ID"
+client_id = "32fce9b52a73fb9f21f305a24949a6d7"
 application_url = "https://your-app-url.com"
 embedded = true
 
