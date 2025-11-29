@@ -174,7 +174,7 @@ export function ConditionBuilder({
         <Text as="h3" variant="headingSm">
           When these conditions are met
         </Text>
-        <Badge tone="info">{conditions.length} condition{conditions.length !== 1 ? "s" : ""}</Badge>
+        <Badge tone="info">{`${conditions.length} condition${conditions.length !== 1 ? "s" : ""}`}</Badge>
       </InlineStack>
 
       {/* Condition Cards with Visual Flow */}

@@ -215,7 +215,7 @@ export function RuleList({
           {totalCount} Rule{totalCount !== 1 ? "s" : ""}
         </Text>
         {activeCount > 0 ? (
-          <Badge tone="success">{activeCount} active</Badge>
+          <Badge tone="success">{`${activeCount} active`}</Badge>
         ) : (
           <Badge tone="warning">None active</Badge>
         )}

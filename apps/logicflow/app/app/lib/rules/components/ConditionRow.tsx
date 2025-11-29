@@ -205,7 +205,7 @@ export function ConditionRow({
               />
             }
           >
-            {filteredTags.length > 0 && (
+            {filteredTags.length > 0 ? (
               <Listbox onSelect={handleTagSelect}>
                 {filteredTags.map((tag) => (
                   <Listbox.Option key={tag} value={tag}>
@@ -213,7 +213,7 @@ export function ConditionRow({
                   </Listbox.Option>
                 ))}
               </Listbox>
-            )}
+            ) : null}
           </Combobox>
           {isUnsupportedTag && (
             <InlineStack gap="100" blockAlign="center">

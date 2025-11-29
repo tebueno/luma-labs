@@ -103,7 +103,7 @@ function LivePreview({
             <Badge tone={enabled ? "success" : undefined}>
               {enabled ? "Active" : "Disabled"}
             </Badge>
-            <Badge tone="info">{complexity} pt{complexity !== 1 ? "s" : ""}</Badge>
+            <Badge tone="info">{`${complexity} pt${complexity !== 1 ? "s" : ""}`}</Badge>
           </InlineStack>
         </InlineStack>
 
@@ -273,12 +273,7 @@ export function RuleModal({
                     Enable this rule
                   </Text>
                   {formState.enabled ? (
-                    <Badge tone="success">
-                      <InlineStack gap="100" blockAlign="center">
-                        <Icon source={CheckCircleIcon} />
-                        <span>Will block checkout</span>
-                      </InlineStack>
-                    </Badge>
+                    <Badge tone="success">Will block checkout</Badge>
                   ) : (
                     <Badge>Disabled - won't affect checkout</Badge>
                   )}

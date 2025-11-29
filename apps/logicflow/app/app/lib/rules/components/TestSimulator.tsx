@@ -305,7 +305,7 @@ export function TestSimulator({ rules, open, onClose }: TestSimulatorProps) {
                     />
                   }
                 >
-                  {filteredTags.length > 0 && (
+                  {filteredTags.length > 0 || tagInputValue ? (
                     <Listbox onSelect={addTag}>
                       {filteredTags.slice(0, 10).map((tag) => (
                         <Listbox.Option key={tag} value={tag}>
@@ -323,15 +323,13 @@ export function TestSimulator({ rules, open, onClose }: TestSimulatorProps) {
                             Add custom: "{tagInputValue}"
                           </Listbox.Option>
                         )}
+                      {filteredTags.length === 0 && tagInputValue && (
+                        <Listbox.Option value={tagInputValue.toLowerCase()}>
+                          Add custom: "{tagInputValue}"
+                        </Listbox.Option>
+                      )}
                     </Listbox>
-                  )}
-                  {filteredTags.length === 0 && tagInputValue && (
-                    <Listbox onSelect={addTag}>
-                      <Listbox.Option value={tagInputValue.toLowerCase()}>
-                        Add custom: "{tagInputValue}"
-                      </Listbox.Option>
-                    </Listbox>
-                  )}
+                  ) : null}
                 </Combobox>
               </BlockStack>
             </BlockStack>
