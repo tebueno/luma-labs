@@ -1,0 +1,45 @@
+query Input {
+  cart {
+    cost {
+      totalAmount {
+        amount
+      }
+      subtotalAmount {
+        amount
+      }
+    }
+    lines {
+      quantity
+    }
+    buyerIdentity {
+      customer {
+        id
+        hasTags(tags: [
+          "vip", "wholesale", "retail", "b2b", "preferred", "premium", "gold", "silver", "bronze",
+          "blacklist", "blocked", "fraud", "suspicious", "review",
+          "test", "staff", "employee", "internal",
+          "newsletter", "beta", "loyalty", "referral",
+          "corporate", "enterprise", "partner", "reseller", "distributor"
+        ]) {
+          hasTag
+          tag
+        }
+      }
+    }
+    deliveryGroups {
+      deliveryAddress {
+        address1
+        address2
+        city
+        provinceCode
+        countryCode
+        zip
+      }
+    }
+  }
+  shop {
+    metafield(namespace: "gatekeep", key: "rules_config") {
+      value
+    }
+  }
+}

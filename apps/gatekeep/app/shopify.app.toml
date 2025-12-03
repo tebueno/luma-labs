@@ -1,0 +1,30 @@
+# Shopify App Configuration
+# Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "Gatekeep"
+client_id = "32fce9b52a73fb9f21f305a24949a6d7"
+application_url = "https://luma-labs-jade.vercel.app"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+
+[access_scopes]
+scopes = "read_products,read_customers"
+
+[auth]
+redirect_urls = [
+  "https://luma-labs-jade.vercel.app/auth/callback",
+  "https://luma-labs-jade.vercel.app/auth/shopify/callback"
+]
+
+[webhooks]
+api_version = "2026-01"
+
+[pos]
+embedded = false
+
+# NOTE: App Store listing info (contact email, privacy policy URL, etc.)
+# is entered directly in the Shopify Partner Dashboard when submitting,
+# not in this config file. See docs/APP_STORE_LISTING.md for details.
+

@@ -1,0 +1,18 @@
+api_version = "2025-01"
+
+[[extensions]]
+name = "Gatekeep Validator"
+handle = "gatekeep-validator"
+uid = "b3b36576-3d24-95df-88e4-2d8723b630e91451dc6d"
+type = "function"
+
+  [extensions.build]
+  command = "cargo build --target wasm32-wasip1 --release"
+  path = "target/wasm32-wasip1/release/gatekeep-validator.wasm"
+
+  [[extensions.targeting]]
+  target = "purchase.validation.run"
+  input_query = "src/run.graphql"
+
+  [extensions.ui]
+  enable_create = false

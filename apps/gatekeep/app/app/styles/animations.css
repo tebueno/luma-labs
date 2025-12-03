@@ -1,0 +1,165 @@
+/* Gatekeep Custom Animations and Transitions */
+
+/* ============================================================================
+   Fade In Animation - for new elements
+   ============================================================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gatekeep-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* ============================================================================
+   Slide In Animation - for banners and alerts
+   ============================================================================ */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gatekeep-slide-in {
+  animation: slideIn 0.25s ease-out;
+}
+
+/* ============================================================================
+   Pulse Animation - for status indicators
+   ============================================================================ */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.gatekeep-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ============================================================================
+   Success Animation - checkmark bounce
+   ============================================================================ */
+
+@keyframes successBounce {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.gatekeep-success-bounce {
+  animation: successBounce 0.3s ease-out;
+}
+
+/* ============================================================================
+   Smooth Transitions for Interactive Elements
+   ============================================================================ */
+
+/* Status indicator strips */
+.gatekeep-status-indicator {
+  transition: background-color 0.2s ease;
+}
+
+/* Cards and containers */
+.gatekeep-card-transition {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.gatekeep-card-transition:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Buttons */
+.gatekeep-btn-transition {
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.gatekeep-btn-transition:active {
+  transform: scale(0.98);
+}
+
+/* Progress bars */
+.gatekeep-progress-transition {
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Badge transitions */
+.gatekeep-badge-transition {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ============================================================================
+   Loading State
+   ============================================================================ */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.gatekeep-loading {
+  background: linear-gradient(90deg, #f4f6f8 0%, #e9ebee 50%, #f4f6f8 100%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================================================
+   Focus States - Accessibility
+   ============================================================================ */
+
+.gatekeep-focus-ring:focus-visible {
+  outline: 2px solid #5c6ac4;
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Reduced Motion - Accessibility
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .gatekeep-fade-in,
+  .gatekeep-slide-in,
+  .gatekeep-pulse,
+  .gatekeep-success-bounce {
+    animation: none;
+  }
+  
+  .gatekeep-status-indicator,
+  .gatekeep-card-transition,
+  .gatekeep-btn-transition,
+  .gatekeep-progress-transition,
+  .gatekeep-badge-transition {
+    transition: none;
+  }
+}
+
