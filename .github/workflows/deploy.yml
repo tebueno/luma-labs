@@ -1,10 +1,10 @@
-name: Deploy LogicFlow to Shopify
+name: Deploy Gatekeep to Shopify
 
 on:
   push:
     branches: [main]
     paths:
-      - 'apps/logicflow/app/**'
+      - 'apps/gatekeep/app/**'
       - '.github/workflows/deploy.yml'
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/logicflow/app
+        working-directory: apps/gatekeep/app
     
     steps:
       - name: Checkout code
@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: apps/logicflow/app/package-lock.json
+          cache-dependency-path: apps/gatekeep/app/package-lock.json
       
       - name: Install Rust
         run: |
@@ -43,4 +43,3 @@ jobs:
         env:
           SHOPIFY_CLI_PARTNERS_TOKEN: ${{ secrets.SHOPIFY_CLI_PARTNERS_TOKEN }}
         run: npx shopify app deploy --force
-
